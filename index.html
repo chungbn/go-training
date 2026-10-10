@@ -274,6 +274,12 @@ h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0; line-height:1.
 @keyframes poof{to{transform:scale(1.8) rotate(25deg); opacity:0}}
 .bub{animation:bubin .35s cubic-bezier(.3,1.6,.6,1); transform-box:fill-box; transform-origin:center}
 @keyframes bubin{from{transform:scale(0)}}
+.danger-halo{animation:danger 0.9s ease-in-out infinite; transform-box:fill-box; transform-origin:center}
+@keyframes danger{0%,100%{opacity:.85; transform:scale(1)}50%{opacity:.25; transform:scale(1.3)}}
+.danger-ring{animation:dring .9s ease-in-out infinite}
+@keyframes dring{50%{stroke-opacity:.3}}
+.danger-stone{animation:tremble .45s ease-in-out infinite; transform-box:fill-box; transform-origin:center}
+@keyframes tremble{25%{transform:rotate(-4deg) translateX(-1px)}75%{transform:rotate(4deg) translateX(1px)}}
 
 /* Turtle */
 .turtle{display:block; height:auto; overflow:visible}
@@ -330,6 +336,9 @@ h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0; line-height:1.
     </linearGradient>
     <radialGradient id="gBub" cx="35%" cy="30%" r="70%">
       <stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#bfe9ff"/><stop offset="1" stop-color="#55b8ec"/>
+    </radialGradient>
+    <radialGradient id="gDanger">
+      <stop offset=".55" stop-color="#ff2d2d" stop-opacity=".95"/><stop offset="1" stop-color="#ff2d2d" stop-opacity="0"/>
     </radialGradient>
     <clipPath id="shellClip"><path d="M24 86 Q28 38 64 36 Q100 38 100 86 Z"/></clipPath>
   </defs>
@@ -1434,8 +1443,13 @@ function renderBoard(){
   }
   S.bubbles.forEach(i => { const [cx,cy] = xy(n,i);
     s += `<g class="bub"><circle cx="${cx}" cy="${cy}" r="${R*0.62}" fill="url(#gBub)" stroke="#2a8fd0" stroke-width="2"/><circle cx="${cx-5}" cy="${cy-6}" r="3.5" fill="#fff"/></g>`; });
-  B.g.forEach((c,i) => { if (!c) return; const [cx,cy] = xy(n,i);
-    s += `<g class="${i === S.drop ? 'drop' : ''}"><circle cx="${cx+1.5}" cy="${cy+3}" r="${R}" fill="rgba(60,30,0,.3)"/><circle cx="${cx}" cy="${cy}" r="${R}" fill="url(#${c === 1 ? 'gB' : 'gW'})"/></g>`; });
+  // Stones whose group has only one liberty left flash red so the danger is easy to spot.
+  const danger = new Set(S.showTerr ? [] : [...groupsInAtari(B,1), ...groupsInAtari(B,2)].flatMap(g => g.stones));
+  danger.forEach(i => { const [cx,cy] = xy(n,i);
+    s += `<circle class="danger-halo" cx="${cx}" cy="${cy}" r="${R*1.22}" fill="url(#gDanger)"/>`; });
+  B.g.forEach((c,i) => { if (!c) return; const [cx,cy] = xy(n,i), d = danger.has(i);
+    s += `<g class="${i === S.drop ? 'drop' : ''}"><g class="${d ? 'danger-stone' : ''}"><circle cx="${cx+1.5}" cy="${cy+3}" r="${R}" fill="rgba(60,30,0,.3)"/><circle cx="${cx}" cy="${cy}" r="${R}" fill="url(#${c === 1 ? 'gB' : 'gW'})"/>`
+      + (d ? `<circle class="danger-ring" cx="${cx}" cy="${cy}" r="${R-1.5}" fill="none" stroke="#ff2d2d" stroke-width="3.5"/>` : '') + `</g></g>`; });
   S.poof.forEach(([i,c]) => { const [cx,cy] = xy(n,i);
     s += `<circle class="poof" cx="${cx}" cy="${cy}" r="${R}" fill="url(#${c === 1 ? 'gB' : 'gW'})"/>`; });
   if (S.last >= 0 && B.g[S.last]){ const [cx,cy] = xy(n,S.last);
