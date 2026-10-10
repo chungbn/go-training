@@ -264,11 +264,20 @@ h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0; line-height:1.
 .sc .num b{font-size:2.1rem; color:var(--leaf-dark); display:inline-block}
 .sc .num b.bump{animation:bump .6s cubic-bezier(.3,1.6,.6,1)}
 @keyframes bump{0%{transform:scale(2.2); color:var(--coral)}}
-.sc .pips{display:flex; flex-wrap:wrap; gap:4px}
-.sc .pips i{width:17px; height:17px; border-radius:50%; border:2px dashed #9aa5b5}
-.sc .pips i.got{border:0}
-.sc .pips.w i.got{background:radial-gradient(circle at 35% 30%, #fff, #bfc6cf 75%); box-shadow:inset 0 0 0 1px #8a94a3}
-.sc .pips.b i.got{background:radial-gradient(circle at 35% 30%, #6b7488, #07080b 70%)}
+.sc{flex-wrap:wrap}
+.prog{display:flex; gap:5px; width:100%}
+.prog i{flex:1; height:16px; border-radius:6px; background:rgba(29,43,68,.1); box-shadow:inset 0 2px 0 rgba(29,43,68,.08); position:relative; overflow:hidden}
+.prog i:first-child{border-radius:999px 6px 6px 999px}
+.prog i:last-child{border-radius:6px 999px 999px 6px}
+.prog i:only-child{border-radius:999px}
+.prog i::after{content:""; position:absolute; inset:0; border-radius:inherit; transform:scaleX(0); transform-origin:left;
+  background:linear-gradient(180deg, #7ee08f, var(--leaf) 55%, var(--leaf-dark)); box-shadow:inset 0 -3px 0 rgba(0,0,0,.12)}
+.prog i.got::after{transform:none}
+.prog i.new::after{animation:fillseg .6s cubic-bezier(.3,1.3,.6,1) both}
+@keyframes fillseg{from{transform:scaleX(0)}}
+.prog.near i.got::after{background:linear-gradient(180deg, #ffd27a, var(--sun) 55%, var(--sun-dark))}
+.prog i.next{animation:nextseg 1.2s ease-in-out infinite}
+@keyframes nextseg{50%{background:rgba(255,200,58,.45)}}
 .sc .left{font-weight:800; font-size:.88rem; color:var(--ink-soft)}
 .sc .left.near{color:var(--coral-dark); animation:pulse 1s ease-in-out infinite}
 @media (max-width:420px){ .sc{padding:8px 10px; gap:8px} .sc .st{width:28px; height:28px} .sc .num b{font-size:1.7rem} }
@@ -1597,12 +1606,13 @@ function renderScore(){
   bar.hidden = false;
   const shown = S.shownCaps || { 1:0, 2:0 };
   bar.innerHTML = [1,2].map(c => {
-    const got = S.caps[c], cap = st.rule === 'cap', left = Math.max(0, st.need - got), opp = c === 1 ? 'w' : 'b';
+    const got = S.caps[c], cap = st.rule === 'cap', left = Math.max(0, st.need - got);
     const name = vsBot() ? (c === 1 ? 'Bé' : 'Thầy Rùa') : (c === 1 ? 'Quân Đen' : 'Quân Trắng');
-    const pips = cap ? `<span class="pips ${opp}">${Array.from({length:st.need}, (_,k) => `<i class="${k < got ? 'got' : ''}"></i>`).join('')}</span>` : '';
+    const segs = Array.from({length:st.need}, (_,k) => `<i class="${k < got ? 'got' + (k >= shown[c] ? ' new' : '') : k === got && S.turn === c && !S.done ? 'next' : ''}"></i>`).join('');
+    const prog = cap ? `<div class="prog${left === 1 ? ' near' : ''}" role="img" aria-label="Đã ăn ${got} trên ${st.need} quân">${segs}</div>` : '';
     const note = cap ? (left ? `<span class="left${left === 1 ? ' near' : ''}">${left === 1 ? 'Còn 1 quân nữa là thắng!' : `Còn ${left} quân nữa`}</span>` : '<span class="left">Đủ rồi!</span>') : '';
     return `<div class="sc${S.turn === c && !S.done ? ' on' : ''}"><i class="st ${c === 1 ? 'b' : 'w'}"></i><div class="info">
-      <span class="nm">${name}</span><span class="num">Đã ăn <b class="${got > shown[c] ? 'bump' : ''}">${got}</b>${cap ? ` / ${st.need}` : ''}</span>${pips}${note}</div></div>`;
+      <span class="nm">${name}</span><span class="num">Đã ăn <b class="${got > shown[c] ? 'bump' : ''}">${got}</b>${cap ? ` / ${st.need}` : ''}</span>${note}</div>${prog}</div>`;
   }).join('');
   S.shownCaps = { ...S.caps };
 }
