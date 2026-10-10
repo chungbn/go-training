@@ -361,14 +361,21 @@ h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0; line-height:1.
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" id="tabLearn" aria-selected="true">Học bài<small>8 hòn đảo cho bạn mới</small></button>
       <button class="tab" role="tab" id="tabPlay" aria-selected="false">Thử thách<small>100 ván cờ, khó dần lên</small></button>
-      <button class="tab" role="tab" id="tabDuel" aria-selected="false">Hai người<small>Cùng bạn chơi trên một máy</small></button>
+      <button class="tab" role="tab" id="tabDuel" aria-selected="false">Đấu cờ<small>Với Thầy Rùa hoặc với bạn</small></button>
     </div>
     <div class="duel" id="duel" hidden>
       <div>
-        <h3>Hai bạn cùng chơi</h3>
-        <p>Hai bạn ngồi cạnh nhau và thay phiên chạm vào bàn cờ. Quân đen luôn đi trước. Thầy Rùa sẽ làm trọng tài.</p>
+        <h3 id="duelTitle">Đấu cờ</h3>
+        <p id="duelDesc"></p>
       </div>
-      <div class="duel-players"><span><i class="pb"></i>Bạn cầm quân Đen</span><span><i class="pw"></i>Bạn cầm quân Trắng</span></div>
+      <div class="opt"><span class="opt-label">Đối thủ</span>
+        <div class="seg" data-k="vs"><button data-v="bot">Thầy Rùa (máy)</button><button data-v="friend">Hai bạn cùng chơi</button></div>
+      </div>
+      <div class="opt" id="lvlOpt"><span class="opt-label">Độ khó</span>
+        <div class="seg" data-k="lvl"><button data-v="0">Dễ</button><button data-v="1">Vừa</button><button data-v="2">Khó</button></div>
+        <p class="opt-help" id="lvlHelp"></p>
+      </div>
+      <div class="duel-players" id="duelPlayers"></div>
       <div class="opt"><span class="opt-label">Bàn cờ</span>
         <div class="seg" data-k="size"><button data-v="5">5 × 5</button><button data-v="7">7 × 7</button><button data-v="9">9 × 9</button></div>
       </div>
@@ -609,6 +616,78 @@ function aiMove(B, warned, opt = {}){
     if (s > bestS){ bestS = s; best = i; }
   }
   return best >= 0 ? best : legal[0][0];
+}
+/* Opponent for "Đấu cờ" against Thầy Rùa. Level 0 easy, 1 medium, 2 hard.
+   Scores every legal move with simple Go sense plus some randomness; returns -1 to pass.
+   `warned` holds the child's stones that were already in atari before their last move: the
+   easier levels mostly capture only those, so the child always gets a chance to escape first. */
+const BOT = [
+  { noise:4,  capP:.5, freeCap:0,  saveP:.3,  atari:-2,  self:2, leave:0, infl:0 },
+  { noise:3,  capP:.9, freeCap:.15, saveP:.55, atari:0,   self:4, leave:1, infl:.3 },
+  { noise:.6, capP:1,  freeCap:1,  saveP:1,   atari:3.5, self:9, leave:5, infl:1.2 },
+];
+function regions(B){
+  const n = B.n, owner = new Array(n*n).fill(0), size = new Array(n*n).fill(0), seen = new Set();
+  for (let i = 0; i < n*n; i++){
+    if (B.g[i] || seen.has(i)) continue;
+    const reg = [i], st = [i], border = new Set(); seen.add(i);
+    while (st.length){
+      const j = st.pop();
+      for (const k of nbrs(n,j)){
+        if (!B.g[k]){ if (!seen.has(k)){ seen.add(k); st.push(k); reg.push(k); } }
+        else border.add(B.g[k]);
+      }
+    }
+    const o = border.size === 1 ? [...border][0] : 0;
+    reg.forEach(j => { owner[j] = o; size[j] = reg.length; });
+  }
+  return { owner, size };
+}
+function botMove(B, c, level, ko, terr, warned = new Set()){
+  const n = B.n, o = 3 - c, P = BOT[level];
+  const wantCap = Math.random() < P.capP, wantFree = Math.random() < P.freeCap, wantSave = Math.random() < P.saveP;
+  const myAtari = groupsInAtari(B, c);
+  const stones = B.g.filter(Boolean).length, early = stones < n*n/3;
+  const R = terr ? regions(B) : null, cap = Math.max(4, Math.floor(n*n*.3));
+  // Influence of each colour on every point, used to claim space in territory games.
+  const inf = new Array(n*n).fill(0), dist = (a,b) => Math.abs(a%n - b%n) + Math.abs((a/n|0) - (b/n|0));
+  if (terr && P.infl) for (let s = 0; s < n*n; s++) if (B.g[s]) for (let j = 0; j < n*n; j++){ const d = dist(s,j); if (d <= 3) inf[j] += (B.g[s] === c ? 1 : -1) / (1 << d); }
+  let best = -1, bestS = terr ? 0 : -1e9;
+  for (let i = 0; i < n*n; i++){
+    if (B.g[i] || i === ko) continue;
+    const r = play(B, i, c); if (!r.ok) continue;
+    const ns = nbrs(n, i);
+    const saves = myAtari.filter(g => r.board.g[g.stones[0]] === c && groupAt(r.board, g.stones[0]).libs.size >= 2);
+    if (ns.every(k => B.g[k] === c) && !saves.length) continue;          // never fill an own eye
+    if (r.captured.length && !(r.captured.some(k => warned.has(k)) ? wantCap : wantFree)) continue;
+    let s = Math.random() * P.noise;
+    if (r.captured.length) s += 6 + 3 * r.captured.length;
+    if (wantSave) for (const g of saves) s += 5 + 2 * g.stones.length;
+    const mine = groupAt(r.board, i).libs.size;
+    if (mine === 1) s -= P.self; else if (mine === 2) s -= P.self / 5;
+    if (P.leave) s -= P.leave * groupsInAtari(r.board, c).reduce((a,g) => a + g.stones.length, 0);
+    const seen = new Set();
+    for (const k of ns){
+      if (r.board.g[k] !== o || seen.has(k)) continue;
+      const g = groupAt(r.board, k); g.stones.forEach(x => seen.add(x));
+      s += g.libs.size === 1 ? P.atari * (1 + g.stones.length / 3) : g.libs.size === 2 ? .8 : .3;
+    }
+    if (terr){
+      const mineArea = R.owner[i] === c && R.size[i] <= cap, theirs = R.owner[i] === o && R.size[i] <= cap;
+      if ((mineArea || theirs) && !r.captured.length && !saves.length) continue;   // settled area: nothing to gain
+      const x = i % n, y = (i - x) / n, edge = Math.min(x, y, n-1-x, n-1-y);
+      if (early && edge === 0) s -= 1.5;
+      if (P.infl){
+        let gain = 0;
+        for (let j = 0; j < n*n; j++){ const d = dist(i,j); if (d > 3 || B.g[j]) continue;
+          const a = inf[j], b = a + 1 / (1 << d); if (a <= 0 && b > 0) gain += a < 0 ? 1 : .6; }
+        s += P.infl * gain * .5;
+      }
+      s += .5;   // a neutral point is still worth one point when counting
+    }
+    if (s > bestS){ bestS = s; best = i; }
+  }
+  return best;
 }
 /* Does black's move i (result r) solve a 'move' puzzle? */
 function goalMet(st, r, i){
@@ -968,7 +1047,7 @@ function renderMap(){
   $('#worlds').hidden = MODE !== 'play';
   $('#duel').hidden = MODE !== 'duel';
   if (MODE === 'duel'){
-    $('#heroText').textContent = 'Rủ bạn bè, anh chị hoặc bố mẹ cùng chơi nhé! Chọn bàn cờ và luật chơi ở bên dưới, rồi bấm Bắt đầu.';
+    $('#heroText').textContent = 'Đấu với Thầy Rùa, hoặc rủ bạn bè, anh chị, bố mẹ cùng chơi nhé! Chọn đối thủ, bàn cờ và luật chơi ở bên dưới, rồi bấm Bắt đầu.';
     $('#playNext').innerHTML = 'Bắt đầu chơi';
     $('#playNext').onclick = openDuel;
     renderDuelSetup();
@@ -1057,38 +1136,56 @@ $('#tabLearn').onclick = () => setMode('learn');
 $('#tabPlay').onclick = () => setMode('play');
 $('#tabDuel').onclick = () => setMode('duel');
 
-/* ================= Two players on one device ================= */
-let DUEL = { size:7, rule:'cap1' };
-try { const d = JSON.parse(localStorage.getItem(KEY + '-duel')); if (d && d.size && d.rule) DUEL = d; } catch(e){}
+/* ================= Match: against Thầy Rùa or two players on one device ================= */
+let DUEL = { size:7, rule:'cap1', vs:'bot', lvl:0 };
+try { const d = JSON.parse(localStorage.getItem(KEY + '-duel')); if (d && d.size && d.rule) DUEL = { ...DUEL, ...d }; } catch(e){}
 const RULE_HELP = {
-  cap1:'Bên nào ăn được quân của bạn trước sẽ thắng. Ván chơi rất nhanh, hợp với bạn mới.',
+  cap1:'Bên nào ăn được quân của đối thủ trước sẽ thắng. Ván chơi rất nhanh, hợp với bạn mới.',
   cap3:'Bên nào ăn được tổng cộng 3 quân trước sẽ thắng.',
   cap5:'Bên nào ăn được tổng cộng 5 quân trước sẽ thắng. Ván dài hơn một chút.',
-  terr:'Luật cờ vây thật: hai bên rào đất. Khi cả hai bạn đều bấm Bỏ lượt liên tiếp, Thầy Rùa đếm quân và đất của mỗi bên. Bên nhiều điểm hơn sẽ thắng.',
+  terr:'Luật cờ vây thật: hai bên rào đất. Khi cả hai bên đều bỏ lượt liên tiếp, Thầy Rùa đếm quân và đất của mỗi bên. Bên nhiều điểm hơn sẽ thắng.',
 };
+const LVL_NAME = ['Dễ', 'Vừa', 'Khó'];
+const LVL_HELP = [
+  'Thầy Rùa đi nhẹ nhàng, hay bỏ qua cơ hội ăn quân. Hợp với bé mới tập.',
+  'Thầy Rùa biết ăn quân và chạy thoát. Bé phải chú ý hơi thở của quân mình.',
+  'Thầy Rùa chơi hết sức, ít khi sơ hở. Dành cho bé đã thắng được mức Vừa.',
+];
 function renderDuelSetup(){
   document.querySelectorAll('#duel .seg').forEach(seg => {
     seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(DUEL[seg.dataset.k]) === b.dataset.v));
   });
+  const bot = DUEL.vs === 'bot';
+  $('#lvlOpt').hidden = !bot;
+  $('#lvlHelp').textContent = LVL_HELP[DUEL.lvl];
+  $('#duelTitle').textContent = bot ? 'Đấu với Thầy Rùa' : 'Hai bạn cùng chơi';
+  $('#duelDesc').textContent = bot
+    ? 'Bé cầm quân đen và đi trước, Thầy Rùa cầm quân trắng. Chọn độ khó vừa sức rồi bắt đầu nhé!'
+    : 'Hai bạn ngồi cạnh nhau và thay phiên chạm vào bàn cờ. Quân đen luôn đi trước. Thầy Rùa sẽ làm trọng tài.';
+  $('#duelPlayers').innerHTML = bot
+    ? '<span><i class="pb"></i>Bé cầm quân Đen</span><span><i class="pw"></i>Thầy Rùa cầm quân Trắng</span>'
+    : '<span><i class="pb"></i>Bạn cầm quân Đen</span><span><i class="pw"></i>Bạn cầm quân Trắng</span>';
   $('#ruleHelp').textContent = RULE_HELP[DUEL.rule];
 }
 $('#duel').addEventListener('click', e => {
   const b = e.target.closest('.seg button'); if (!b) return;
   const k = b.closest('.seg').dataset.k;
-  DUEL[k] = k === 'size' ? +b.dataset.v : b.dataset.v;
+  DUEL[k] = k === 'size' || k === 'lvl' ? +b.dataset.v : b.dataset.v;
   try { localStorage.setItem(KEY + '-duel', JSON.stringify(DUEL)); } catch(e){}
   renderDuelSetup();
 });
 $('#duelStart').onclick = () => openDuel();
 function openDuel(){
-  const terr = DUEL.rule === 'terr', need = terr ? 0 : +DUEL.rule.slice(3);
-  openRun({ kind:'duel', idx:0, eyebrow:`Hai người chơi · Bàn ${DUEL.size} × ${DUEL.size}`,
+  const terr = DUEL.rule === 'terr', need = terr ? 0 : +DUEL.rule.slice(3), bot = DUEL.vs === 'bot';
+  const goal = terr ? 'Hai bên cùng rào đất. Khi không còn chỗ tốt để đi, hãy bấm Bỏ lượt.' : `Bên nào ăn được ${need} quân trước sẽ thắng.`;
+  openRun({ kind:'duel', idx:0,
+    eyebrow: bot ? `Đấu với Thầy Rùa · ${LVL_NAME[DUEL.lvl]} · Bàn ${DUEL.size} × ${DUEL.size}` : `Hai người chơi · Bàn ${DUEL.size} × ${DUEL.size}`,
     title: terr ? 'Vây đất' : `Ai ăn ${need} quân trước`,
-    steps:[{ type:'duel', size:DUEL.size, rule: terr ? 'terr' : 'cap', need,
-      text: terr ? 'Ván cờ bắt đầu! Quân đen đi trước. Hai bạn cùng rào đất nhé. Khi không còn chỗ tốt để đi, hãy bấm Bỏ lượt.'
-        : `Ván cờ bắt đầu! Quân đen đi trước. Bạn nào ăn được ${need} quân trước sẽ thắng.` }] });
+    steps:[{ type:'duel', size:DUEL.size, rule: terr ? 'terr' : 'cap', need, vs:DUEL.vs, lvl:DUEL.lvl,
+      text: bot ? `Ván cờ bắt đầu! Bé cầm quân đen và đi trước. ${goal}` : `Ván cờ bắt đầu! Quân đen đi trước. ${goal}` }] });
 }
-const PNAME = { 1:'quân Đen', 2:'quân Trắng' };
+const vsBot = () => S.step.vs === 'bot';
+const pn = c => vsBot() ? (c === 1 ? 'bé' : 'Thầy Rùa') : (c === 1 ? 'quân Đen' : 'quân Trắng');
 const cap1st = s => s[0].toUpperCase() + s.slice(1);
 function duelSnapshot(){
   return { board:cloneB(S.board), caps:{...S.caps}, last:S.last, ko:S.ko, turn:S.turn, passes:S.passes };
@@ -1098,50 +1195,77 @@ function duelTap(i){
   if (i === S.ko){ fail('Chưa được ăn lại ngay ở chỗ này. Đây là luật Ko: phải đi chỗ khác một nước rồi mới được ăn lại.', false); return; }
   const r = play(S.board, i, c);
   if (!r.ok){ fail(r.reason === 'occupied' ? 'Chỗ này đã có quân rồi. Chọn giao điểm còn trống nhé.' : 'Đặt ở đây quân sẽ hết hơi thở ngay. Không được đặt đâu!', false); return; }
+  duelPlace(r, i, c);
+}
+function duelPlace(r, i, c){
   S.history.push(duelSnapshot());
   applyMove(r, i, c);
   S.caps[c] += r.captured.length; S.passes = 0;
   const me = groupAt(S.board, i);
   S.ko = (r.captured.length === 1 && me.stones.length === 1 && me.libs.size === 1) ? r.captured[0] : -1;
   S.turn = 3 - c;
-  if (S.step.rule === 'cap' && S.caps[c] >= S.step.need){ duelEnd(c, `${cap1st(PNAME[c])} ăn đủ ${S.step.need} quân. ${cap1st(PNAME[c])} thắng rồi!`); return; }
+  if (S.step.rule === 'cap' && S.caps[c] >= S.step.need){ duelEnd(c, `${cap1st(pn(c))} ăn đủ ${S.step.need} quân. ${cap1st(pn(c))} thắng rồi!`); return; }
+  const botNext = vsBot() && S.turn === 2;
+  if (botNext) S.locked = true;
   renderBoard(); renderTurn(); renderCtrl();
   const danger = groupsInAtari(S.board, S.turn).length;
-  if (r.captured.length) say(`${cap1st(PNAME[c])} ăn được ${r.captured.length} quân! Đến lượt ${PNAME[S.turn]}.`, 'good');
-  else if (danger) say(`Cẩn thận! ${cap1st(PNAME[S.turn])} có quân chỉ còn 1 hơi thở.`);
-  else { $('#say').className = 'say'; $('#sayText').textContent = `Đến lượt ${PNAME[S.turn]}.`; }
+  if (r.captured.length){ say(`${cap1st(pn(c))} ăn được ${r.captured.length} quân!${botNext ? '' : ` Đến lượt ${pn(S.turn)}.`}`, c === 2 && vsBot() ? 'oops' : 'good'); S.keepSay = botNext; }
+  else if (danger && !botNext) say(`Cẩn thận! ${cap1st(pn(S.turn))} có quân chỉ còn 1 hơi thở.`);
+  else if (!S.keepSay){ $('#say').className = 'say'; $('#sayText').textContent = botNext ? 'Thầy Rùa đang nghĩ...' : `Đến lượt ${pn(S.turn)}.`; }
+  if (!botNext) S.keepSay = false;
+  if (botNext) botTurn();
+}
+function botTurn(){
+  const gid = S.gid;
+  S.locked = true; renderTurn(); renderCtrl();
+  setTimeout(() => {
+    if (gid !== S.gid || S.done) return;
+    S.locked = false;
+    const prev = S.history[S.history.length - 1];
+    const warned = new Set(prev ? groupsInAtari(prev.board, 1).flatMap(g => g.stones) : []);
+    const k = botMove(S.board, 2, S.step.lvl, S.ko, S.step.rule === 'terr', warned);
+    if (k < 0) duelPass(); else duelPlace(play(S.board, k, 2), k, 2);
+  }, 750);
 }
 function duelPass(){
+  if (S.locked) return;
   S.history.push(duelSnapshot());
-  const c = S.turn; S.passes++; S.ko = -1; S.turn = 3 - c;
+  const c = S.turn; S.passes++; S.ko = -1; S.turn = 3 - c; S.keepSay = false;
   if (S.passes >= 2){ duelScore(); return; }
   renderTurn(); renderCtrl();
-  say(`${cap1st(PNAME[c])} bỏ lượt. Nếu ${PNAME[S.turn]} cũng bỏ lượt, ván cờ sẽ kết thúc và Thầy Rùa đếm điểm.`);
+  if (vsBot() && c === 1){ say('Bé bỏ lượt. Đến lượt Thầy Rùa.'); botTurn(); return; }
+  say(vsBot() ? 'Thầy Rùa bỏ lượt. Nếu bé cũng thấy hết chỗ tốt, bấm Bỏ lượt để Thầy Rùa đếm điểm nhé.'
+    : `${cap1st(pn(c))} bỏ lượt. Nếu ${pn(S.turn)} cũng bỏ lượt, ván cờ sẽ kết thúc và Thầy Rùa đếm điểm.`);
 }
 function duelUndo(){
-  const h = S.history.pop(); if (!h) return;
-  S.board = h.board; S.caps = h.caps; S.last = h.last; S.ko = h.ko; S.turn = h.turn; S.passes = h.passes;
+  if (S.locked) return;
+  let h = S.history.pop();
+  while (h && vsBot() && h.turn === 2 && S.history.length) h = S.history.pop();   // take back Thầy Rùa's reply too
+  if (!h) return;
+  S.board = h.board; S.caps = h.caps; S.last = h.last; S.ko = h.ko; S.turn = h.turn; S.passes = h.passes; S.keepSay = false;
   renderBoard(); renderTurn(); renderCtrl();
-  say(`Đã đi lại một nước. Đến lượt ${PNAME[S.turn]}.`);
+  say(`Đã đi lại một nước. Đến lượt ${pn(S.turn)}.`);
 }
 function duelScore(){
   const T = territory(S.board), pts = { 1:0, 2:0 };
   S.board.g.forEach((c,i) => { if (c) pts[c]++; else if (T[i]) pts[T[i]]++; });
   S.showTerr = true;
   const w = pts[1] > pts[2] ? 1 : pts[2] > pts[1] ? 2 : 0;
-  duelEnd(w, `Hết ván! Quân Đen được ${pts[1]} điểm, quân Trắng được ${pts[2]} điểm. ${w ? cap1st(PNAME[w]) + ' thắng!' : 'Hai bạn hòa nhau!'}`);
+  duelEnd(w, `Hết ván! ${cap1st(pn(1))} được ${pts[1]} điểm, ${pn(2)} được ${pts[2]} điểm. ${w ? cap1st(pn(w)) + ' thắng!' : vsBot() ? 'Hòa nhau rồi!' : 'Hai bạn hòa nhau!'}`);
 }
 function duelEnd(winner, msg){
-  S.done = true;
+  S.done = true; S.locked = false;
   renderBoard(); renderTurn(); renderCtrl();
-  sfx.fanfare(); if (winner) confetti();
-  say(msg, 'good');
+  const lost = vsBot() && winner === 2;
+  if (lost) say(msg + ' Không sao đâu, bé chơi ván mới nhé!', 'oops');
+  else { sfx.fanfare(); if (winner) confetti(); say(msg, 'good'); }
 }
 window.addEventListener('resize', () => requestAnimationFrame(drawPath));
 $('#hello').onclick = () => {
   ac();
   speak(MODE === 'duel'
-    ? 'Chào các bạn! Hai bạn ngồi cạnh nhau, chọn bàn cờ và luật chơi, rồi bấm Bắt đầu. Quân đen luôn đi trước nhé!'
+    ? (DUEL.vs === 'bot' ? 'Chào bé! Bé muốn đấu với Thầy Rùa à? Bé chọn độ khó, bàn cờ và luật chơi, rồi bấm Bắt đầu nhé. Bé cầm quân đen và đi trước!'
+      : 'Chào các bạn! Hai bạn ngồi cạnh nhau, chọn bàn cờ và luật chơi, rồi bấm Bắt đầu. Quân đen luôn đi trước nhé!')
     : MODE === 'play'
     ? 'Chào bé! Ở đây có một trăm ván cờ, khó dần lên từng chút một. Ván có vương miện là trận đấu với Thầy Rùa. Bé chạm vào quân cờ đang nhấp nháy để chơi nhé!'
     : 'Chào bé! Mình là Thầy Rùa. Mỗi hòn đảo là một bài học nhỏ. Bé chạm vào hòn đảo có lá cờ đỏ để bắt đầu nhé!');
@@ -1193,7 +1317,7 @@ function startStep(){
   S.found = new Set(); S.placed = 0; S.rounds = 0; S.last = -1; S.xmark = -1; S.poof = []; S.drop = -1;
   S.done = false; S.locked = false; S.over = false; S.showTerr = !!st.terr; S.warned = new Set();
   S.kidCaps = 0; S.aiCaps = 0;
-  S.turn = 1; S.caps = { 1:0, 2:0 }; S.passes = 0; S.ko = -1; S.history = [];
+  S.turn = 1; S.caps = { 1:0, 2:0 }; S.passes = 0; S.ko = -1; S.history = []; S.gid = (S.gid || 0) + 1; S.keepSay = false;
   $('#dots').innerHTML = L.steps.length < 2 ? '' : L.steps.map((_,k) => `<i class="${k < S.si ? 'on' : k === S.si ? 'now' : ''}"></i>`).join('');
   say(st.text);
   renderCtrl();
@@ -1224,8 +1348,8 @@ function renderCtrl(){
   if (st.type === 'duel'){
     if (S.done) h += `<button class="gbtn go pulse" data-a="newgame">Chơi ván mới${ICON_GO}</button>`;
     else {
-      if (st.rule === 'terr') h += `<button class="gbtn" data-a="pass">Bỏ lượt</button>`;
-      if (S.history.length) h += `<button class="gbtn alt" data-a="undo">Đi lại</button>`;
+      if (st.rule === 'terr' && !S.locked) h += `<button class="gbtn" data-a="pass">Bỏ lượt</button>`;
+      if (S.history.length && !S.locked) h += `<button class="gbtn alt" data-a="undo">Đi lại</button>`;
       h += `<button class="gbtn alt" data-a="newgame">Ván mới</button>`;
     }
   } else if (st.type === 'talk' || S.done){
@@ -1254,7 +1378,7 @@ $('#ctrl').addEventListener('click', e => {
     if (o.ok) success(st.done); else fail(st.fail);
   }
 });
-$('#backBtn').onclick = () => show('map');
+$('#backBtn').onclick = () => { S.gid = (S.gid || 0) + 1; show('map'); };
 
 function hintFor(){
   const st = S.step, B = S.board, n = B.n;
@@ -1433,8 +1557,9 @@ function renderTurn(){
   c.hidden = false;
   if (st.type === 'duel'){
     c.className = 'turnchip' + (S.turn === 2 ? ' white' : '');
-    const sc = st.rule === 'cap' ? ` · Đã ăn: Đen ${S.caps[1]}/${st.need}, Trắng ${S.caps[2]}/${st.need}` : ` · Đã ăn: Đen ${S.caps[1]}, Trắng ${S.caps[2]}`;
-    c.innerHTML = `<b></b> Lượt ${PNAME[S.turn]}${sc}`;
+    const [a, b] = vsBot() ? ['Bé', 'Rùa'] : ['Đen', 'Trắng'], of = st.rule === 'cap' ? '/' + st.need : '';
+    const sc = ` · Đã ăn: ${a} ${S.caps[1]}${of}, ${b} ${S.caps[2]}${of}`;
+    c.innerHTML = (vsBot() && S.turn === 2 ? '<b></b> Thầy Rùa đang nghĩ...' : `<b></b> Lượt ${pn(S.turn)}`) + sc;
     return;
   }
   c.className = 'turnchip' + (S.locked ? ' white' : '');
