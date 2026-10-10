@@ -178,6 +178,30 @@ h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0; line-height:1.
 .mini{display:flex; gap:1px}
 .mini svg{width:14px; height:14px}
 
+/* ---------- Two-player setup ---------- */
+.duel{
+  margin-top:24px; background:var(--card); border-radius:var(--r-lg); padding:22px;
+  box-shadow:0 0 0 6px rgba(255,255,255,.3), 0 14px 26px rgba(8,60,95,.3);
+  display:flex; flex-direction:column; gap:18px;
+}
+.duel h3{font-size:1.65rem; color:var(--ink)}
+.duel > div > p{margin:4px 0 0; font-weight:700; color:var(--ink-soft); max-width:60ch; line-height:1.5}
+.duel-players{display:flex; gap:12px; flex-wrap:wrap}
+.duel-players span{display:inline-flex; align-items:center; gap:8px; font-weight:800; padding:6px 14px 6px 6px; border-radius:999px; background:rgba(29,43,68,.07)}
+.duel-players i{width:26px; height:26px; border-radius:50%; display:inline-block}
+.duel-players .pb{background:radial-gradient(circle at 35% 30%, #6b7488, #07080b 70%)}
+.duel-players .pw{background:radial-gradient(circle at 35% 30%, #fff, #bfc6cf 75%); box-shadow:inset 0 0 0 1px #aab3bf}
+.opt{display:flex; flex-direction:column; gap:8px}
+.opt-label{font-weight:800; font-size:.85rem; letter-spacing:.7px; text-transform:uppercase; color:var(--ink-soft)}
+.seg{display:flex; flex-wrap:wrap; gap:8px}
+.seg button{
+  border:0; border-radius:14px; padding:10px 16px; min-height:46px;
+  background:rgba(29,43,68,.08); color:var(--ink); font-weight:800; font-size:1.05rem;
+}
+.seg button[aria-pressed="true"]{background:var(--ink); color:#fff; box-shadow:0 4px 0 rgba(29,43,68,.35)}
+.opt-help{margin:0; font-weight:700; color:var(--ink-soft); line-height:1.5; max-width:60ch}
+.duel .gbtn{align-self:flex-start}
+
 /* ---------- Lesson screen ---------- */
 .lesson-top{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px}
 .lesson-top h2{font-size:clamp(1.4rem,4vw,2rem); color:#fff; text-shadow:0 3px 0 rgba(8,60,95,.45); margin-right:auto; min-width:0}
@@ -221,7 +245,7 @@ h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0; line-height:1.
 .turnchip{
   position:absolute; left:50%; top:-14px; translate:-50% 0; z-index:2;
   background:var(--ink); color:#fff; font-weight:800; padding:4px 14px; border-radius:999px; font-size:.95rem;
-  display:flex; align-items:center; gap:8px; white-space:nowrap;
+  display:flex; align-items:center; gap:8px; width:max-content; max-width:94%; text-align:center;
 }
 .turnchip b{display:inline-block; width:14px; height:14px; border-radius:50%; background:#111; box-shadow:0 0 0 2px #fff}
 .turnchip.white b{background:#fff; box-shadow:0 0 0 2px #999}
@@ -337,6 +361,22 @@ h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0; line-height:1.
     <div class="tabs" role="tablist">
       <button class="tab" role="tab" id="tabLearn" aria-selected="true">Học bài<small>8 hòn đảo cho bạn mới</small></button>
       <button class="tab" role="tab" id="tabPlay" aria-selected="false">Thử thách<small>100 ván cờ, khó dần lên</small></button>
+      <button class="tab" role="tab" id="tabDuel" aria-selected="false">Hai người<small>Cùng bạn chơi trên một máy</small></button>
+    </div>
+    <div class="duel" id="duel" hidden>
+      <div>
+        <h3>Hai bạn cùng chơi</h3>
+        <p>Hai bạn ngồi cạnh nhau và thay phiên chạm vào bàn cờ. Quân đen luôn đi trước. Thầy Rùa sẽ làm trọng tài.</p>
+      </div>
+      <div class="duel-players"><span><i class="pb"></i>Bạn cầm quân Đen</span><span><i class="pw"></i>Bạn cầm quân Trắng</span></div>
+      <div class="opt"><span class="opt-label">Bàn cờ</span>
+        <div class="seg" data-k="size"><button data-v="5">5 × 5</button><button data-v="7">7 × 7</button><button data-v="9">9 × 9</button></div>
+      </div>
+      <div class="opt"><span class="opt-label">Luật chơi</span>
+        <div class="seg" data-k="rule"><button data-v="cap1">Ăn 1 quân trước</button><button data-v="cap3">Ăn 3 quân trước</button><button data-v="cap5">Ăn 5 quân trước</button><button data-v="terr">Vây đất</button></div>
+      </div>
+      <p class="opt-help" id="ruleHelp"></p>
+      <button class="gbtn go" id="duelStart">Bắt đầu chơi</button>
     </div>
     <div class="map" id="map">
       <svg class="path" id="mapPath"></svg>
@@ -907,7 +947,7 @@ const unlocked = i => i === 0 || starsOf(i-1) > 0;
 const lvStars = i => SAVE.lv[i] || 0;
 const lvUnlocked = i => i === 0 || lvStars(i-1) > 0;
 let MODE = 'learn';
-try { if (localStorage.getItem(KEY + '-mode') === 'play') MODE = 'play'; } catch(e){}
+try { const m = localStorage.getItem(KEY + '-mode'); if (m === 'play' || m === 'duel') MODE = m; } catch(e){}
 let RUN = null;   // what is being played: {kind:'lesson'|'level', idx, steps, eyebrow, title}
 
 const S = { si:0, step:null, board:null, base:null, targets:[], found:new Set(), hints:[], bubbles:[],
@@ -923,8 +963,17 @@ function renderMap(){
   $('#starTotal').innerHTML = `${starSVG(true)} ${total + lvTotal}/${(LESSONS.length + LEVEL_SPECS.length) * 3}`;
   $('#tabLearn').setAttribute('aria-selected', MODE === 'learn');
   $('#tabPlay').setAttribute('aria-selected', MODE === 'play');
+  $('#tabDuel').setAttribute('aria-selected', MODE === 'duel');
   $('#map').hidden = MODE !== 'learn';
   $('#worlds').hidden = MODE !== 'play';
+  $('#duel').hidden = MODE !== 'duel';
+  if (MODE === 'duel'){
+    $('#heroText').textContent = 'Rủ bạn bè, anh chị hoặc bố mẹ cùng chơi nhé! Chọn bàn cờ và luật chơi ở bên dưới, rồi bấm Bắt đầu.';
+    $('#playNext').innerHTML = 'Bắt đầu chơi';
+    $('#playNext').onclick = openDuel;
+    renderDuelSetup();
+    return;
+  }
   const next = LESSONS.findIndex((_,i) => !starsOf(i));
   const nx = next < 0 ? 0 : next;
   if (MODE === 'play'){
@@ -1006,10 +1055,94 @@ function setMode(m){
 }
 $('#tabLearn').onclick = () => setMode('learn');
 $('#tabPlay').onclick = () => setMode('play');
+$('#tabDuel').onclick = () => setMode('duel');
+
+/* ================= Two players on one device ================= */
+let DUEL = { size:7, rule:'cap1' };
+try { const d = JSON.parse(localStorage.getItem(KEY + '-duel')); if (d && d.size && d.rule) DUEL = d; } catch(e){}
+const RULE_HELP = {
+  cap1:'Bên nào ăn được quân của bạn trước sẽ thắng. Ván chơi rất nhanh, hợp với bạn mới.',
+  cap3:'Bên nào ăn được tổng cộng 3 quân trước sẽ thắng.',
+  cap5:'Bên nào ăn được tổng cộng 5 quân trước sẽ thắng. Ván dài hơn một chút.',
+  terr:'Luật cờ vây thật: hai bên rào đất. Khi cả hai bạn đều bấm Bỏ lượt liên tiếp, Thầy Rùa đếm quân và đất của mỗi bên. Bên nhiều điểm hơn sẽ thắng.',
+};
+function renderDuelSetup(){
+  document.querySelectorAll('#duel .seg').forEach(seg => {
+    seg.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(DUEL[seg.dataset.k]) === b.dataset.v));
+  });
+  $('#ruleHelp').textContent = RULE_HELP[DUEL.rule];
+}
+$('#duel').addEventListener('click', e => {
+  const b = e.target.closest('.seg button'); if (!b) return;
+  const k = b.closest('.seg').dataset.k;
+  DUEL[k] = k === 'size' ? +b.dataset.v : b.dataset.v;
+  try { localStorage.setItem(KEY + '-duel', JSON.stringify(DUEL)); } catch(e){}
+  renderDuelSetup();
+});
+$('#duelStart').onclick = () => openDuel();
+function openDuel(){
+  const terr = DUEL.rule === 'terr', need = terr ? 0 : +DUEL.rule.slice(3);
+  openRun({ kind:'duel', idx:0, eyebrow:`Hai người chơi · Bàn ${DUEL.size} × ${DUEL.size}`,
+    title: terr ? 'Vây đất' : `Ai ăn ${need} quân trước`,
+    steps:[{ type:'duel', size:DUEL.size, rule: terr ? 'terr' : 'cap', need,
+      text: terr ? 'Ván cờ bắt đầu! Quân đen đi trước. Hai bạn cùng rào đất nhé. Khi không còn chỗ tốt để đi, hãy bấm Bỏ lượt.'
+        : `Ván cờ bắt đầu! Quân đen đi trước. Bạn nào ăn được ${need} quân trước sẽ thắng.` }] });
+}
+const PNAME = { 1:'quân Đen', 2:'quân Trắng' };
+const cap1st = s => s[0].toUpperCase() + s.slice(1);
+function duelSnapshot(){
+  return { board:cloneB(S.board), caps:{...S.caps}, last:S.last, ko:S.ko, turn:S.turn, passes:S.passes };
+}
+function duelTap(i){
+  const c = S.turn;
+  if (i === S.ko){ fail('Chưa được ăn lại ngay ở chỗ này. Đây là luật Ko: phải đi chỗ khác một nước rồi mới được ăn lại.', false); return; }
+  const r = play(S.board, i, c);
+  if (!r.ok){ fail(r.reason === 'occupied' ? 'Chỗ này đã có quân rồi. Chọn giao điểm còn trống nhé.' : 'Đặt ở đây quân sẽ hết hơi thở ngay. Không được đặt đâu!', false); return; }
+  S.history.push(duelSnapshot());
+  applyMove(r, i, c);
+  S.caps[c] += r.captured.length; S.passes = 0;
+  const me = groupAt(S.board, i);
+  S.ko = (r.captured.length === 1 && me.stones.length === 1 && me.libs.size === 1) ? r.captured[0] : -1;
+  S.turn = 3 - c;
+  if (S.step.rule === 'cap' && S.caps[c] >= S.step.need){ duelEnd(c, `${cap1st(PNAME[c])} ăn đủ ${S.step.need} quân. ${cap1st(PNAME[c])} thắng rồi!`); return; }
+  renderBoard(); renderTurn(); renderCtrl();
+  const danger = groupsInAtari(S.board, S.turn).length;
+  if (r.captured.length) say(`${cap1st(PNAME[c])} ăn được ${r.captured.length} quân! Đến lượt ${PNAME[S.turn]}.`, 'good');
+  else if (danger) say(`Cẩn thận! ${cap1st(PNAME[S.turn])} có quân chỉ còn 1 hơi thở.`);
+  else { $('#say').className = 'say'; $('#sayText').textContent = `Đến lượt ${PNAME[S.turn]}.`; }
+}
+function duelPass(){
+  S.history.push(duelSnapshot());
+  const c = S.turn; S.passes++; S.ko = -1; S.turn = 3 - c;
+  if (S.passes >= 2){ duelScore(); return; }
+  renderTurn(); renderCtrl();
+  say(`${cap1st(PNAME[c])} bỏ lượt. Nếu ${PNAME[S.turn]} cũng bỏ lượt, ván cờ sẽ kết thúc và Thầy Rùa đếm điểm.`);
+}
+function duelUndo(){
+  const h = S.history.pop(); if (!h) return;
+  S.board = h.board; S.caps = h.caps; S.last = h.last; S.ko = h.ko; S.turn = h.turn; S.passes = h.passes;
+  renderBoard(); renderTurn(); renderCtrl();
+  say(`Đã đi lại một nước. Đến lượt ${PNAME[S.turn]}.`);
+}
+function duelScore(){
+  const T = territory(S.board), pts = { 1:0, 2:0 };
+  S.board.g.forEach((c,i) => { if (c) pts[c]++; else if (T[i]) pts[T[i]]++; });
+  S.showTerr = true;
+  const w = pts[1] > pts[2] ? 1 : pts[2] > pts[1] ? 2 : 0;
+  duelEnd(w, `Hết ván! Quân Đen được ${pts[1]} điểm, quân Trắng được ${pts[2]} điểm. ${w ? cap1st(PNAME[w]) + ' thắng!' : 'Hai bạn hòa nhau!'}`);
+}
+function duelEnd(winner, msg){
+  S.done = true;
+  renderBoard(); renderTurn(); renderCtrl();
+  sfx.fanfare(); if (winner) confetti();
+  say(msg, 'good');
+}
 window.addEventListener('resize', () => requestAnimationFrame(drawPath));
 $('#hello').onclick = () => {
   ac();
-  speak(MODE === 'play'
+  speak(MODE === 'duel'
+    ? 'Chào các bạn! Hai bạn ngồi cạnh nhau, chọn bàn cờ và luật chơi, rồi bấm Bắt đầu. Quân đen luôn đi trước nhé!'
+    : MODE === 'play'
     ? 'Chào bé! Ở đây có một trăm ván cờ, khó dần lên từng chút một. Ván có vương miện là trận đấu với Thầy Rùa. Bé chạm vào quân cờ đang nhấp nháy để chơi nhé!'
     : 'Chào bé! Mình là Thầy Rùa. Mỗi hòn đảo là một bài học nhỏ. Bé chạm vào hòn đảo có lá cờ đỏ để bắt đầu nhé!');
 };
@@ -1060,6 +1193,7 @@ function startStep(){
   S.found = new Set(); S.placed = 0; S.rounds = 0; S.last = -1; S.xmark = -1; S.poof = []; S.drop = -1;
   S.done = false; S.locked = false; S.over = false; S.showTerr = !!st.terr; S.warned = new Set();
   S.kidCaps = 0; S.aiCaps = 0;
+  S.turn = 1; S.caps = { 1:0, 2:0 }; S.passes = 0; S.ko = -1; S.history = [];
   $('#dots').innerHTML = L.steps.length < 2 ? '' : L.steps.map((_,k) => `<i class="${k < S.si ? 'on' : k === S.si ? 'now' : ''}"></i>`).join('');
   say(st.text);
   renderCtrl();
@@ -1087,7 +1221,14 @@ function renderCtrl(){
   if (st.type === 'game' && S.over && !S.done) h += `<button class="gbtn red pulse" data-a="retry">Chơi lại ván mới</button>`;
   if (!S.done && !S.over && ['move','targets','game'].includes(st.type) && !(st.type === 'targets' && st.hint))
     h += `<button class="gbtn alt" data-a="hint">${ICON_BULB}Gợi ý</button>`;
-  if (st.type === 'talk' || S.done){
+  if (st.type === 'duel'){
+    if (S.done) h += `<button class="gbtn go pulse" data-a="newgame">Chơi ván mới${ICON_GO}</button>`;
+    else {
+      if (st.rule === 'terr') h += `<button class="gbtn" data-a="pass">Bỏ lượt</button>`;
+      if (S.history.length) h += `<button class="gbtn alt" data-a="undo">Đi lại</button>`;
+      h += `<button class="gbtn alt" data-a="newgame">Ván mới</button>`;
+    }
+  } else if (st.type === 'talk' || S.done){
     const last = S.si === RUN.steps.length - 1;
     h += `<button class="gbtn go pulse" data-a="next">${last ? 'Hoàn thành' : 'Tiếp tục'}${ICON_GO}</button>`;
   }
@@ -1105,7 +1246,9 @@ $('#ctrl').addEventListener('click', e => {
       ? 'Quân trắng này chỉ còn 1 hơi thở. Bé đặt vào chỗ nhấp nháy để ăn nó!' : 'Bé nhìn chỗ đang nhấp nháy nhé!');
     else say('Chưa có quân trắng nào sắp bị ăn. Bé đặt quân sát quân trắng để lấy bớt hơi thở của nó nhé.');
   }
-  if (a === 'retry') startStep();
+  if (a === 'retry' || a === 'newgame') startStep();
+  if (a === 'pass') duelPass();
+  if (a === 'undo') duelUndo();
   if (a === 'opt'){
     const o = st.options[+b.dataset.k];
     if (o.ok) success(st.done); else fail(st.fail);
@@ -1158,7 +1301,7 @@ function renderBoard(){
     s += `<line x1="${a}" y1="${p}" x2="${z}" y2="${p}" stroke="#5b3a17" stroke-width="${w}" stroke-linecap="round"/>`;
     s += `<line x1="${p}" y1="${a}" x2="${p}" y2="${z}" stroke="#5b3a17" stroke-width="${w}" stroke-linecap="round"/>`;
   }
-  const stars = n === 7 ? [[3,3]] : n === 5 ? [[2,2]] : [];
+  const stars = n === 9 ? [[2,2],[6,2],[4,4],[2,6],[6,6]] : n === 7 ? [[3,3]] : n === 5 ? [[2,2]] : [];
   stars.forEach(p => { const [cx,cy] = xy(n, pid(n,p)); s += `<circle cx="${cx}" cy="${cy}" r="4.5" fill="#5b3a17"/>`; });
   if (S.showTerr){
     const T = territory(B);
@@ -1193,14 +1336,16 @@ function pointFromEvent(e){
 }
 const placing = () => {
   const t = S.step && S.step.type;
-  return !S.done && !S.locked && !S.over && (t === 'free' || t === 'alternate' || t === 'move' || t === 'game' || t === 'targets');
+  return !S.done && !S.locked && !S.over && (t === 'free' || t === 'alternate' || t === 'move' || t === 'game' || t === 'targets' || t === 'duel');
 };
 $('#board').addEventListener('pointermove', e => {
   const g = $('#ghost'); if (!g) return;
   const i = e.pointerType === 'mouse' && placing() ? pointFromEvent(e) : -1;
   if (i < 0 || S.board.g[i] || S.found.has(i)){ g.setAttribute('cx', -100); return; }
   const [cx,cy] = xy(S.board.n, i); g.setAttribute('cx', cx); g.setAttribute('cy', cy);
-  g.setAttribute('fill', S.step.marker === 'bubble' ? '#55b8ec' : '#111');
+  const white = S.step.type === 'duel' && S.turn === 2;
+  g.setAttribute('fill', S.step.marker === 'bubble' ? '#55b8ec' : white ? '#fff' : '#111');
+  g.setAttribute('opacity', white ? '.6' : '.28');
 });
 $('#board').addEventListener('pointerleave', () => { const g = $('#ghost'); if (g) g.setAttribute('cx', -100); });
 $('#board').addEventListener('click', e => {
@@ -1277,14 +1422,21 @@ function onTap(i){
       break;
     }
     case 'game': gameTap(i); break;
+    case 'duel': duelTap(i); break;
   }
 }
 
 /* ================= Capture game ================= */
 function renderTurn(){
   const c = $('#turnChip'), st = S.step;
-  if (!st || !['game','alternate'].includes(st.type) || S.done || S.over){ c.hidden = true; return; }
+  if (!st || !['game','alternate','duel'].includes(st.type) || S.done || S.over){ c.hidden = true; return; }
   c.hidden = false;
+  if (st.type === 'duel'){
+    c.className = 'turnchip' + (S.turn === 2 ? ' white' : '');
+    const sc = st.rule === 'cap' ? ` · Đã ăn: Đen ${S.caps[1]}/${st.need}, Trắng ${S.caps[2]}/${st.need}` : ` · Đã ăn: Đen ${S.caps[1]}, Trắng ${S.caps[2]}`;
+    c.innerHTML = `<b></b> Lượt ${PNAME[S.turn]}${sc}`;
+    return;
+  }
   c.className = 'turnchip' + (S.locked ? ' white' : '');
   const need = st.need || 1;
   const score = need > 1 ? ` · Bé ${S.kidCaps}/${need} · Rùa ${S.aiCaps}/${need}` : '';
