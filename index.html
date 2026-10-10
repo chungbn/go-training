@@ -17,6 +17,7 @@
   --leaf:#39b864; --leaf-dark:#23894a;
   --coral:#ff6f59; --coral-dark:#cf4733;
   --bubble:#bfe9ff;
+  --w1:#ffe3a1; --w2:#cdeeb4; --w3:#ffd3c7; --w4:#ffc89e; --w5:#ddd5ff;
   --display:"Baloo 2","Comic Sans MS","Trebuchet MS",system-ui,sans-serif;
   --body:"Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   --r-lg:28px; --r-md:18px;
@@ -133,6 +134,49 @@ h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0; line-height:1.
 .isle .sub{font-size:.9rem; font-weight:800; color:var(--foam); opacity:.95}
 .stars{display:flex; gap:2px; justify-content:center}
 .stars svg{width:24px; height:24px}
+
+/* ---------- Mode tabs ---------- */
+.tabs{display:flex; flex-wrap:wrap; gap:12px; margin-top:26px}
+.tab{
+  flex:1 1 220px; border:0; border-radius:var(--r-md); padding:12px 18px; text-align:left;
+  background:rgba(255,255,255,.18); color:#fff; box-shadow:inset 0 0 0 3px rgba(255,255,255,.4);
+  font-family:var(--display); font-weight:800; font-size:1.35rem; line-height:1.15;
+}
+.tab small{display:block; font-family:var(--body); font-size:.9rem; font-weight:800; opacity:.85}
+.tab[aria-selected="true"]{background:#fff; color:var(--ink); box-shadow:0 6px 0 rgba(8,60,95,.35)}
+
+/* ---------- Challenge worlds ---------- */
+.worlds{display:flex; flex-direction:column; gap:24px; margin-top:24px}
+.world{
+  background:var(--wc); border-radius:var(--r-lg); padding:18px;
+  box-shadow:0 0 0 6px rgba(255,255,255,.3), 0 14px 26px rgba(8,60,95,.3);
+}
+.world-head{display:flex; flex-wrap:wrap; gap:10px 16px; align-items:flex-start; justify-content:space-between; margin-bottom:16px}
+.world-head > div{min-width:0}
+.world-head small{font-weight:800; font-size:.8rem; letter-spacing:.7px; text-transform:uppercase; color:var(--ink-soft)}
+.world-head h3{font-size:1.65rem; color:var(--ink)}
+.world-head p{margin:2px 0 0; font-weight:700; color:var(--ink-soft)}
+.wstars{display:inline-flex; align-items:center; gap:6px; padding:5px 12px; border-radius:999px; background:rgba(29,43,68,.1); font-weight:800; font-variant-numeric:tabular-nums}
+.wstars svg{width:20px; height:20px}
+.lv-grid{display:grid; grid-template-columns:repeat(auto-fill, minmax(62px, 1fr)); gap:14px 8px}
+.lv{display:flex; flex-direction:column; align-items:center; gap:4px; border:0; background:none; padding:0}
+.lv-stone{
+  position:relative; width:54px; height:54px; border-radius:50%;
+  display:grid; place-items:center; transition:transform .12s;
+  background:radial-gradient(circle at 35% 30%, #5a6378, #12151c 70%); color:#fff;
+  font-family:var(--display); font-weight:800; font-size:1.35rem; line-height:1;
+  box-shadow:0 4px 0 rgba(0,0,0,.28);
+}
+.lv.done .lv-stone{background:radial-gradient(circle at 35% 30%, #fff, #dfe4ea 70%); color:var(--ink)}
+.lv.boss .lv-stone{box-shadow:0 0 0 4px var(--coral), 0 4px 0 rgba(0,0,0,.28)}
+.lv .crown{position:absolute; top:-15px; left:50%; translate:-50% 0; width:26px; height:18px}
+.lv:disabled{cursor:not-allowed}
+.lv:disabled .lv-stone{background:radial-gradient(circle at 35% 30%, #d2d8e0, #9aa3b1 70%); color:rgba(255,255,255,.9)}
+.lv:disabled .lv-stone svg{width:22px; height:22px}
+.lv:hover:not(:disabled) .lv-stone{transform:translateY(-3px)}
+.lv.next .lv-stone{animation:pulse 1.4s ease-in-out infinite}
+.mini{display:flex; gap:1px}
+.mini svg{width:14px; height:14px}
 
 /* ---------- Lesson screen ---------- */
 .lesson-top{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px}
@@ -282,7 +326,7 @@ h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0; line-height:1.
       <div id="heroTurtle"></div>
       <div>
         <h2>Chào bé! Mình là Thầy Rùa</h2>
-        <p>Mỗi hòn đảo là một bài học nhỏ. Bé học xong đảo này sẽ mở được đảo tiếp theo, và nhận sao vàng thật nhiều nhé!</p>
+        <p id="heroText">Mỗi hòn đảo là một bài học nhỏ. Bé học xong đảo này sẽ mở được đảo tiếp theo, và nhận sao vàng thật nhiều nhé!</p>
         <div class="row">
           <button class="gbtn go pulse" id="playNext"></button>
           <button class="gbtn alt" id="hello"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>Nghe Thầy Rùa</button>
@@ -290,10 +334,15 @@ h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0; line-height:1.
         <div class="note" id="voiceNote" hidden></div>
       </div>
     </div>
+    <div class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tabLearn" aria-selected="true">Học bài<small>8 hòn đảo cho bạn mới</small></button>
+      <button class="tab" role="tab" id="tabPlay" aria-selected="false">Thử thách<small>100 ván cờ, khó dần lên</small></button>
+    </div>
     <div class="map" id="map">
       <svg class="path" id="mapPath"></svg>
       <div class="isles" id="isles"></div>
     </div>
+    <div class="worlds" id="worlds" hidden></div>
   </section>
 
   <section id="lessonScreen" hidden>
@@ -495,15 +544,15 @@ function groupsInAtari(B,c){
 /* Gentle opponent for the capture game. It only captures black stones the child was already
    warned about and then ignored, rarely runs away, and likes to play close to black stones,
    which keeps leaving white stones for the child to capture. */
-function aiMove(B, warned){
-  const n = B.n, legal = [];
+function aiMove(B, warned, opt = {}){
+  const n = B.n, legal = [], capP = opt.cap ?? 0.5, escP = opt.esc ?? 0.3;
   for (let i = 0; i < n*n; i++){ if (B.g[i] === 0){ const r = play(B,i,2); if (r.ok) legal.push([i,r]); } }
   if (!legal.length) return -1;
   const cap = legal.find(([,r]) => r.captured.some(s => warned.has(s)));
-  if (cap && Math.random() < 0.5) return cap[0];
+  if (cap && Math.random() < capP) return cap[0];
   for (const gr of groupsInAtari(B,2)){
     const l = [...gr.libs][0], r = play(B,l,2);
-    if (r.ok && !r.captured.length && groupAt(r.board,l).libs.size >= 2 && Math.random() < 0.3) return l;
+    if (r.ok && !r.captured.length && groupAt(r.board,l).libs.size >= 2 && Math.random() < escP) return l;
   }
   let best = -1, bestS = -1e9;
   for (const [i,r] of legal){
@@ -520,6 +569,240 @@ function aiMove(B, warned){
     if (s > bestS){ bestS = s; best = i; }
   }
   return best >= 0 ? best : legal[0][0];
+}
+/* Does black's move i (result r) solve a 'move' puzzle? */
+function goalMet(st, r, i){
+  const B = r.board, n = B.n;
+  if (st.goal === 'capture') return r.captured.length > 0;
+  if (st.goal === 'escape') return groupAt(B, pid(n, st.save)).libs.size >= 2;
+  if (st.goal === 'point') return st.points.some(p => pid(n,p) === i);
+  if (st.goal === 'atari') return groupAt(B,i).libs.size >= 2
+    && nbrs(n,i).some(k => B.g[k] === 2 && groupAt(B,k).libs.size === 1);
+  return false;
+}
+function solutions(st, B){
+  const out = [];
+  for (let i = 0; i < B.g.length; i++){
+    if (B.g[i]) continue;
+    const r = play(B,i,1);
+    if (r.ok && goalMet(st, r, i)) out.push(i);
+  }
+  return out;
+}
+
+/* ================= Challenge levels (100, generated from fixed seeds) ================= */
+function mulberry32(a){ return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const pick = (R,a) => a[Math.floor(R() * a.length)];
+const ri = (R,a,b) => a + Math.floor(R() * (b - a + 1));
+const ptOf = (n,i) => [i % n, (i - i % n) / n];
+function shuffle(R,a){ for (let i = a.length - 1; i > 0; i--){ const j = Math.floor(R() * (i+1)); [a[i],a[j]] = [a[j],a[i]]; } return a; }
+function symP([x,y], t, n){ if (t & 1) x = n-1-x; if (t & 2) y = n-1-y; if (t & 4) [x,y] = [y,x]; return [x,y]; }
+function stonesOf(B){
+  const b = [], w = [];
+  B.g.forEach((c,i) => { if (c === 1) b.push(ptOf(B.n,i)); if (c === 2) w.push(ptOf(B.n,i)); });
+  return {b, w};
+}
+function cellsWhere(n, where){
+  const out = [];
+  for (let i = 0; i < n*n; i++){
+    const [x,y] = ptOf(n,i), ex = x === 0 || x === n-1, ey = y === 0 || y === n-1;
+    if (where === 'corner' ? ex && ey : where === 'edge' ? (ex || ey) && !(ex && ey) : where === 'mid' ? !ex && !ey : true) out.push(i);
+  }
+  return out;
+}
+function grow(R, B, size, color, where = 'any'){
+  const empt = cellsWhere(B.n, where).filter(i => !B.g[i]);
+  if (!empt.length) return null;
+  const st = [pick(R, empt)]; B.g[st[0]] = color;
+  while (st.length < size){
+    const fr = [...new Set(st.flatMap(s => nbrs(B.n,s)).filter(k => !B.g[k]))];
+    if (!fr.length) return null;
+    const k = pick(R, fr); B.g[k] = color; st.push(k);
+  }
+  return st;
+}
+function sprinkle(R, B, count, firstColor = 1){
+  for (let k = 0; k < count; k++){
+    const empt = B.g.map((c,i) => c ? -1 : i).filter(i => i >= 0);
+    if (!empt.length) return;
+    B.g[pick(R, empt)] = k % 2 ? 3 - firstColor : firstColor;
+  }
+}
+function minLibs(B, c){
+  let m = Infinity; const seen = new Set();
+  for (let i = 0; i < B.g.length; i++){
+    if (B.g[i] !== c || seen.has(i)) continue;
+    const g = groupAt(B,i); g.stones.forEach(s => seen.add(s)); m = Math.min(m, g.libs.size);
+  }
+  return m;
+}
+const allAlive = B => minLibs(B,1) >= 1 && minLibs(B,2) >= 1;
+
+const GEN = {
+  libs(R, o){
+    const B = makeBoard(o.n), st = grow(R, B, o.size, 1, o.where);
+    if (!st) return null;
+    for (let k = 0; k < (o.block || 0); k++){
+      const L = [...groupAt(B, st[0]).libs]; if (L.length < 3) break;
+      B.g[pick(R, L)] = 2;
+    }
+    const L = groupAt(B, st[0]).libs.size;
+    if (!allAlive(B) || L < 2 || minLibs(B,2) < 2) return null;
+    const one = o.size === 1;
+    return { type:'targets', marker:'bubble', size:o.n, ...stonesOf(B), libsOf:ptOf(o.n, st[0]),
+      text: one ? 'Bé hãy chạm vào tất cả hơi thở của quân đen nhé!' : `Nhóm ${o.size} quân đen nắm tay nhau. Bé tìm tất cả hơi thở của cả nhóm nhé!`,
+      wrong:'Chưa đúng. Hơi thở là chỗ trống nằm sát quân đen, theo đường kẻ.',
+      done:`Đúng rồi! ${one ? 'Quân đen' : 'Nhóm quân đen'} có ${L} hơi thở.` };
+  },
+  cap(R, o){
+    const B = makeBoard(o.n), st = grow(R, B, ri(R, ...o.size), 2, o.where);
+    if (!st) return null;
+    const L = shuffle(R, [...groupAt(B, st[0]).libs]);
+    if (!L.length || L.length > 6) return null;
+    L.slice(1).forEach(i => B.g[i] = 1);
+    sprinkle(R, B, o.distract || 0, 2);
+    sprinkle(R, B, o.noise || 0, 1);
+    const atari = groupsInAtari(B,2);
+    if (!allAlive(B) || minLibs(B,1) < 2 || atari.length !== 1 || !atari[0].stones.includes(st[0])) return null;
+    const n = atari[0].stones.length;
+    return { type:'move', goal:'capture', size:o.n, ...stonesOf(B),
+      text: o.distract ? (n > 1 ? `Có một nhóm ${n} quân trắng chỉ còn 1 hơi thở. Bé tìm và ăn nó nhé!` : 'Quân trắng nào chỉ còn 1 hơi thở? Bé tìm và ăn nó nhé!')
+        : (n > 1 ? `Nhóm ${n} quân trắng chỉ còn 1 hơi thở. Bé ăn cả nhóm đi!` : 'Quân trắng chỉ còn 1 hơi thở. Bé ăn nó đi!'),
+      done: n > 1 ? `Hay quá! Bé ăn được ${n} quân một lúc!` : pick(R, ['Giỏi quá! Bé ăn được quân rồi!', 'Tuyệt vời! Một quân trắng đã bị bắt!', 'Chính xác! Bé tinh mắt lắm!']),
+      fail:'Chưa ăn được. Bé đếm hơi thở của từng quân trắng nhé.' };
+  },
+  esc(R, o){
+    const B = makeBoard(o.n), st = grow(R, B, ri(R, ...o.size), 1, o.where);
+    if (!st) return null;
+    const L = shuffle(R, [...groupAt(B, st[0]).libs]);
+    if (!L.length || L.length > 6) return null;
+    L.slice(1).forEach(i => B.g[i] = 2);
+    sprinkle(R, B, o.distract || 0, 2);
+    sprinkle(R, B, o.noise || 0, 1);
+    const atari = groupsInAtari(B,1);
+    if (!allAlive(B) || atari.length !== 1 || !atari[0].stones.includes(st[0])) return null;
+    if (!o.loose && minLibs(B,2) < 2) return null;
+    const save = ptOf(o.n, st[0]), step = { type:'move', goal:'escape', save, size:o.n, ...stonesOf(B) };
+    if (!solutions(step, B).length) return null;
+    const many = atari[0].stones.length > 1;
+    return { ...step,
+      text: o.loose ? `${many ? 'Nhóm quân đen' : 'Quân đen'} đang bị Atari! Bé chạy thoát, hoặc ăn quân trắng để cứu nhé.`
+        : `${many ? 'Nhóm quân đen' : 'Quân đen'} chỉ còn 1 hơi thở! Bé cứu ${many ? 'cả nhóm' : 'nó'} đi.`,
+      done: pick(R, ['Thoát rồi! Quân đen an toàn rồi.', 'Giỏi lắm! Quân đen đã có thêm hơi thở.', 'Tuyệt! Bé cứu được quân đen rồi.']),
+      fail:'Chưa thoát được. Quân đen vẫn còn quá ít hơi thở. Bé thử chỗ khác nhé.' };
+  },
+  atari(R, o){
+    const B = makeBoard(o.n), st = grow(R, B, ri(R, ...o.size), 2, o.where);
+    if (!st) return null;
+    const L = shuffle(R, [...groupAt(B, st[0]).libs]);
+    if (L.length < 2 || L.length > 6) return null;
+    L.slice(2).forEach(i => B.g[i] = 1);
+    sprinkle(R, B, o.noise || 0, 1);
+    if (!allAlive(B) || minLibs(B,1) < 2 || minLibs(B,2) < 2) return null;
+    const step = { type:'move', goal:'atari', size:o.n, ...stonesOf(B) };
+    if (!solutions(step, B).length) return null;
+    return { ...step,
+      text:'Bé đặt một quân đen để quân trắng chỉ còn 1 hơi thở. Nhớ giữ quân đen của mình an toàn nhé!',
+      done: pick(R, ['Atari! Quân trắng đang gặp nguy rồi.', 'Đúng rồi! Quân trắng chỉ còn 1 hơi thở.']),
+      fail:'Chưa đúng. Quân trắng phải còn đúng 1 hơi thở, và quân đen vừa đặt phải có ít nhất 2 hơi thở.' };
+  },
+  fence(R, o, closed = false){
+    const n = o.n, B = makeBoard(n), at = (x,y,c) => B.g[pid(n,[x,y])] = c;
+    let gaps = [];
+    if (o.shape === 'line'){
+      const c = ri(R, 1, n-3);
+      for (let y = 0; y < n; y++){ at(c,y,1); at(c+1,y,2); gaps.push([c,y]); }
+    } else {
+      const k = ri(R, 2, n-3);
+      for (let y = 0; y <= k; y++) at(k,y,1);
+      for (let x = 0; x < k; x++) at(x,k,1);
+      for (let y = 0; y <= k+1; y++) at(k+1,y,2);
+      for (let x = 0; x <= k; x++) at(x,k+1,2);
+      for (let y = 0; y < k; y++) gaps.push([k,y]);
+      for (let x = 0; x < k; x++) gaps.push([x,k]);
+    }
+    const t = ri(R, 0, 7), S2 = stonesOf(B);
+    const sym = p => symP(p, t, n), b = S2.b.map(sym), w = S2.w.map(sym);
+    const base = { size:n, b, w, terr:closed };
+    if (closed){
+      const T = territory(makeBoard(n, b, w)), cnt = T.filter(o => o === 1).length;
+      const opts = shuffle(R, [cnt, cnt + 1, cnt > 2 ? cnt - 1 : cnt + 2]);
+      return { ...base, type:'quiz',
+        text:'Quân đen vây được mấy điểm đất? Bé đếm các ô vuông đen nhỏ nhé.',
+        options: opts.map(v => ({ label:`${v} điểm`, ok: v === cnt })),
+        done:`Đúng rồi! Quân đen có ${cnt} điểm đất.`, fail:'Chưa đúng. Bé đếm lại từng ô vuông đen nhỏ nhé.' };
+    }
+    const gap = sym(pick(R, gaps));
+    return { ...base, type:'move', goal:'point', points:[gap], terrAfter:true,
+      b: b.filter(p => p[0] !== gap[0] || p[1] !== gap[1]),
+      text:'Hàng rào đen còn một lỗ hổng. Bé đặt quân để rào kín đất nhé!',
+      done:'Hàng rào đã kín! Đất của quân đen an toàn rồi.', fail:'Chưa đúng. Bé tìm chỗ hàng rào đen bị hở nhé.' };
+  },
+  count(R, o){ return GEN.fence(R, o, true); },
+  game(R, o){
+    const n = o.n, base = n === 5 ? { b:[[1,1],[2,2]], w:[[2,1],[1,2]] } : { b:[[2,2],[3,3]], w:[[3,2],[2,3]] };
+    const t = ri(R, 0, 7);
+    return { type:'game', size:n, b:base.b.map(p => symP(p,t,n)), w:base.w.map(p => symP(p,t,n)),
+      need:o.need, ai:{ cap:o.cap, esc:o.esc },
+      text: o.need > 1 ? `Đấu với Thầy Rùa! Ai ăn được ${o.need} quân trước sẽ thắng. Bé đi trước nhé!`
+        : 'Đấu với Thầy Rùa! Ai ăn được quân trước sẽ thắng. Bé đi trước nhé!',
+      done:'Bé thắng Thầy Rùa rồi! Giỏi quá!' };
+  },
+};
+const LV_TITLES = { libs:'Đếm hơi thở', cap:'Ăn quân', esc:'Chạy thoát', atari:'Dồn Atari', fence:'Rào đất', count:'Đếm đất', game:'Đấu với Thầy Rùa' };
+const WORLDS = [
+  { name:'Bãi Biển Hơi Thở', desc:'Đếm hơi thở và ăn những quân đầu tiên', tone:'var(--w1)', levels:[
+    ['libs',{n:5,size:1,where:'mid'}], ['libs',{n:5,size:1,where:'edge'}], ['libs',{n:5,size:1,where:'corner'}], ['libs',{n:5,size:1}],
+    ['cap',{n:5,size:[1,1],where:'mid'}], ['cap',{n:5,size:[1,1],where:'edge'}], ['libs',{n:5,size:2,where:'mid'}], ['libs',{n:5,size:2}],
+    ['cap',{n:5,size:[1,1],where:'corner'}], ['game',{n:5,need:1,cap:.35,esc:.2}],
+    ['libs',{n:5,size:1,where:'mid',block:1}], ['libs',{n:5,size:1,block:2}], ['libs',{n:5,size:2,block:1}],
+    ['cap',{n:5,size:[1,1],distract:1}], ['cap',{n:5,size:[1,1],distract:1}], ['cap',{n:5,size:[1,1],distract:2}],
+    ['libs',{n:5,size:3}], ['libs',{n:6,size:3,block:1}], ['cap',{n:5,size:[1,2],distract:1}], ['game',{n:5,need:1,cap:.45,esc:.25}],
+  ]},
+  { name:'Rừng Dừa Ăn Quân', desc:'Ăn cả nhóm quân trắng', tone:'var(--w2)', levels:[
+    ['cap',{n:5,size:[2,2]}], ['cap',{n:5,size:[2,2]}], ['cap',{n:5,size:[2,2],distract:1}], ['cap',{n:5,size:[2,3],distract:1}],
+    ['cap',{n:6,size:[2,3],distract:1}], ['libs',{n:6,size:3,block:2}], ['cap',{n:6,size:[1,2],distract:2}], ['cap',{n:6,size:[3,3]}],
+    ['cap',{n:6,size:[2,3],distract:1,noise:1}], ['game',{n:5,need:1,cap:.5,esc:.3}],
+    ['cap',{n:6,size:[1,3],distract:2,noise:1}], ['cap',{n:6,size:[1,3],distract:2,noise:1}], ['libs',{n:6,size:4,block:2}],
+    ['cap',{n:6,size:[3,4],distract:1}], ['cap',{n:6,size:[1,3],distract:2,noise:2}], ['cap',{n:6,size:[2,4],distract:2,noise:2}],
+    ['libs',{n:6,size:4,block:3}], ['cap',{n:7,size:[2,3],distract:2,noise:2}], ['cap',{n:7,size:[2,4],distract:2,noise:2}], ['game',{n:6,need:1,cap:.5,esc:.3}],
+  ]},
+  { name:'Hang Cua Chạy Thoát', desc:'Cứu quân đen đang bị Atari', tone:'var(--w3)', levels:[
+    ['esc',{n:5,size:[1,1],where:'mid'}], ['esc',{n:5,size:[1,1],where:'edge'}], ['esc',{n:5,size:[1,1]}], ['esc',{n:5,size:[2,2]}],
+    ['cap',{n:6,size:[1,3],distract:2}], ['esc',{n:5,size:[1,2],distract:1}], ['esc',{n:6,size:[2,2],distract:1}], ['esc',{n:6,size:[2,3],distract:1,noise:1}],
+    ['cap',{n:6,size:[2,3],distract:2,noise:1}], ['game',{n:6,need:1,cap:.55,esc:.35}],
+    ['esc',{n:5,size:[1,1],loose:true,distract:1}], ['esc',{n:6,size:[1,2],loose:true,distract:1}], ['esc',{n:6,size:[2,3],distract:2,noise:1}],
+    ['libs',{n:6,size:3,block:3}], ['esc',{n:6,size:[2,3],loose:true,distract:2}], ['cap',{n:7,size:[2,4],distract:2,noise:2}],
+    ['esc',{n:7,size:[2,3],distract:2,noise:2}], ['esc',{n:7,size:[2,4],loose:true,distract:2,noise:2}], ['cap',{n:7,size:[2,4],distract:3,noise:2}], ['game',{n:6,need:2,cap:.5,esc:.35}],
+  ]},
+  { name:'Núi Lửa Atari', desc:'Dồn quân trắng vào thế Atari', tone:'var(--w4)', levels:[
+    ['atari',{n:5,size:[1,1],where:'mid'}], ['atari',{n:5,size:[1,1]}], ['atari',{n:5,size:[1,1],noise:1}], ['atari',{n:6,size:[2,2]}],
+    ['esc',{n:6,size:[2,3],distract:2}], ['atari',{n:6,size:[1,2],noise:1}], ['cap',{n:6,size:[2,3],distract:2,noise:1}], ['atari',{n:6,size:[2,2],noise:2}],
+    ['esc',{n:6,size:[1,3],loose:true,distract:2}], ['game',{n:6,need:2,cap:.55,esc:.4}],
+    ['atari',{n:6,size:[1,3],noise:2}], ['atari',{n:7,size:[2,3],noise:2}], ['cap',{n:7,size:[2,4],distract:2,noise:2}],
+    ['esc',{n:7,size:[2,3],loose:true,distract:2,noise:1}], ['atari',{n:7,size:[1,3],noise:3}], ['libs',{n:7,size:4,block:3}],
+    ['atari',{n:7,size:[2,3],noise:3}], ['cap',{n:7,size:[3,4],distract:3,noise:2}], ['esc',{n:7,size:[2,4],loose:true,distract:3,noise:2}], ['game',{n:7,need:1,cap:.6,esc:.4}],
+  ]},
+  { name:'Đảo Rồng Vây Đất', desc:'Rào đất, đếm đất và thử tài tổng hợp', tone:'var(--w5)', levels:[
+    ['fence',{n:5,shape:'line'}], ['fence',{n:5,shape:'line'}], ['count',{n:5,shape:'line'}], ['fence',{n:6,shape:'corner'}],
+    ['count',{n:6,shape:'corner'}], ['fence',{n:6,shape:'line'}], ['fence',{n:7,shape:'corner'}], ['count',{n:7,shape:'corner'}],
+    ['cap',{n:7,size:[2,4],distract:2,noise:2}], ['game',{n:7,need:2,cap:.55,esc:.4}],
+    ['fence',{n:6,shape:'corner'}], ['count',{n:6,shape:'line'}], ['atari',{n:7,size:[2,3],noise:2}], ['fence',{n:7,shape:'corner'}],
+    ['count',{n:7,shape:'corner'}], ['esc',{n:7,size:[2,4],loose:true,distract:2,noise:2}], ['fence',{n:7,shape:'line'}], ['count',{n:7,shape:'line'}],
+    ['cap',{n:7,size:[3,4],distract:3,noise:3}], ['game',{n:7,need:3,cap:.6,esc:.45}],
+  ]},
+];
+const LEVEL_SPECS = WORLDS.flatMap((w, wi) => w.levels.map(([kind, o]) => ({ kind, o, wi })));
+const LEVEL_CACHE = {};
+function getLevel(i){
+  if (LEVEL_CACHE[i]) return LEVEL_CACHE[i];
+  const { kind, o, wi } = LEVEL_SPECS[i];
+  let step = null;
+  for (let seed = 0; !step && seed < 40; seed++){
+    const R = mulberry32((i + 1) * 7919 + seed * 104729);
+    for (let t = 0; !step && t < 400; t++) step = GEN[kind](R, o);
+  }
+  return LEVEL_CACHE[i] = { kind, wi, title: LV_TITLES[kind], step };
 }
 
 /* ================= Voice & sound ================= */
@@ -609,19 +892,25 @@ function turtleSVG(){
     </g>
   </svg>`;
 }
-const starSVG = on => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.9 6 6.5.8-4.8 4.5 1.2 6.5L12 17.2l-5.8 3.2 1.2-6.5L2.6 9.4l6.5-.8z" fill="${on ? '#ffc83a' : 'rgba(255,255,255,.35)'}" stroke="${on ? '#c9860c' : 'rgba(29,43,68,.25)'}" stroke-width="1.4" stroke-linejoin="round"/></svg>`;
+const crownSVG = `<svg class="crown" viewBox="0 0 26 18" aria-hidden="true"><path d="M2 16 4 4l5 6 4-8 4 8 5-6 2 12z" fill="#ffc83a" stroke="#c9860c" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
+const starSVG = (on, onLight) => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.9 6 6.5.8-4.8 4.5 1.2 6.5L12 17.2l-5.8 3.2 1.2-6.5L2.6 9.4l6.5-.8z" fill="${on ? '#ffc83a' : onLight ? 'rgba(29,43,68,.16)' : 'rgba(255,255,255,.35)'}" stroke="${on ? '#c9860c' : 'rgba(29,43,68,.25)'}" stroke-width="1.4" stroke-linejoin="round"/></svg>`;
 const lockSVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2.5" fill="#fff"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10" stroke="#fff" stroke-width="2.6" fill="none"/></svg>`;
 const flagSVG = `<svg class="flag" viewBox="0 0 40 48" aria-hidden="true"><path d="M8 4v42" stroke="#5b3a17" stroke-width="3.5" stroke-linecap="round"/><path d="M10 6h24l-6 8 6 8H10z" fill="#ff6f59"/></svg>`;
 
 /* ================= State & storage ================= */
 const KEY = 'dao-co-vay-v1';
-let SAVE = { stars:{} };
-try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.stars) SAVE = s; } catch(e){}
+let SAVE = { stars:{}, lv:{} };
+try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.stars) SAVE = { lv:{}, ...s }; } catch(e){}
 function persist(){ try { localStorage.setItem(KEY, JSON.stringify(SAVE)); } catch(e){} }
 const starsOf = i => SAVE.stars[i] || 0;
 const unlocked = i => i === 0 || starsOf(i-1) > 0;
+const lvStars = i => SAVE.lv[i] || 0;
+const lvUnlocked = i => i === 0 || lvStars(i-1) > 0;
+let MODE = 'learn';
+try { if (localStorage.getItem(KEY + '-mode') === 'play') MODE = 'play'; } catch(e){}
+let RUN = null;   // what is being played: {kind:'lesson'|'level', idx, steps, eyebrow, title}
 
-const S = { li:0, si:0, step:null, board:null, base:null, targets:[], found:new Set(), hints:[], bubbles:[],
+const S = { si:0, step:null, board:null, base:null, targets:[], found:new Set(), hints:[], bubbles:[],
   xmark:-1, drop:-1, poof:[], last:-1, placed:0, rounds:0, mistakes:0, done:false, locked:false, over:false };
 
 const $ = s => document.querySelector(s);
@@ -630,9 +919,23 @@ const $ = s => document.querySelector(s);
 const OFFS = [0.1, 0.55, 0.9, 0.5, 0.08, 0.45, 0.88, 0.5];
 function renderMap(){
   const total = LESSONS.reduce((a,_,i) => a + starsOf(i), 0);
-  $('#starTotal').innerHTML = `${starSVG(true)} ${total}/${LESSONS.length*3}`;
+  const lvTotal = LEVEL_SPECS.reduce((a,_,i) => a + lvStars(i), 0);
+  $('#starTotal').innerHTML = `${starSVG(true)} ${total + lvTotal}/${(LESSONS.length + LEVEL_SPECS.length) * 3}`;
+  $('#tabLearn').setAttribute('aria-selected', MODE === 'learn');
+  $('#tabPlay').setAttribute('aria-selected', MODE === 'play');
+  $('#map').hidden = MODE !== 'learn';
+  $('#worlds').hidden = MODE !== 'play';
   const next = LESSONS.findIndex((_,i) => !starsOf(i));
   const nx = next < 0 ? 0 : next;
+  if (MODE === 'play'){
+    const nl = LEVEL_SPECS.findIndex((_,i) => !lvStars(i));
+    $('#heroText').textContent = 'Một trăm ván cờ đang chờ bé! Mỗi vùng đất có 20 ván, càng đi càng khó hơn một chút. Ván có vương miện là trận đấu với Thầy Rùa.';
+    $('#playNext').innerHTML = nl < 0 ? 'Chơi lại ván 1' : (lvTotal ? `Chơi tiếp: Ván ${nl+1}` : 'Bắt đầu ván 1');
+    $('#playNext').onclick = () => openLevel(nl < 0 ? 0 : nl);
+    renderWorlds(nl);
+    return;
+  }
+  $('#heroText').textContent = 'Mỗi hòn đảo là một bài học nhỏ. Bé học xong đảo này sẽ mở được đảo tiếp theo, và nhận sao vàng thật nhiều nhé!';
   $('#playNext').innerHTML = next < 0 ? 'Chơi lại từ đầu' : (total ? `Chơi tiếp: Đảo ${nx+1}` : 'Bắt đầu học');
   $('#playNext').onclick = () => openLesson(nx);
   $('#isles').innerHTML = LESSONS.map((L,i) => {
@@ -669,10 +972,46 @@ function drawPath(){
 $('#isles').addEventListener('click', e => {
   const b = e.target.closest('.isle-btn'); if (b && !b.disabled) openLesson(+b.dataset.i);
 });
+function renderWorlds(next){
+  let i0 = 0;
+  $('#worlds').innerHTML = WORLDS.map((W, wi) => {
+    const from = i0, to = i0 + W.levels.length; i0 = to;
+    let got = 0; for (let i = from; i < to; i++) got += lvStars(i);
+    const btns = [];
+    for (let i = from; i < to; i++){
+      const ok = lvUnlocked(i), st = lvStars(i), boss = LEVEL_SPECS[i].kind === 'game';
+      const title = LV_TITLES[LEVEL_SPECS[i].kind];
+      btns.push(`<button class="lv ${st ? 'done' : ''} ${boss ? 'boss' : ''} ${i === next ? 'next' : ''}" data-i="${i}" ${ok ? '' : 'disabled'}
+          aria-label="Ván ${i+1}: ${title}${ok ? '' : ' (chưa mở)'}" title="${title}">
+        <span class="lv-stone">${ok ? i+1 : lockSVG}${boss ? crownSVG : ''}</span>
+        <span class="mini">${[0,1,2].map(k => starSVG(k < st, true)).join('')}</span>
+      </button>`);
+    }
+    return `<section class="world" style="--wc:${W.tone}">
+      <div class="world-head">
+        <div><small>Vùng ${wi+1} · Ván ${from+1}–${to}</small><h3>${W.name}</h3><p>${W.desc}</p></div>
+        <span class="wstars">${starSVG(true)} ${got}/${W.levels.length*3}</span>
+      </div>
+      <div class="lv-grid">${btns.join('')}</div>
+    </section>`;
+  }).join('');
+}
+$('#worlds').addEventListener('click', e => {
+  const b = e.target.closest('.lv'); if (b && !b.disabled) openLevel(+b.dataset.i);
+});
+function setMode(m){
+  MODE = m;
+  try { localStorage.setItem(KEY + '-mode', m); } catch(e){}
+  renderMap();
+}
+$('#tabLearn').onclick = () => setMode('learn');
+$('#tabPlay').onclick = () => setMode('play');
 window.addEventListener('resize', () => requestAnimationFrame(drawPath));
 $('#hello').onclick = () => {
   ac();
-  speak('Chào bé! Mình là Thầy Rùa. Mỗi hòn đảo là một bài học nhỏ. Bé chạm vào hòn đảo có lá cờ đỏ để bắt đầu nhé!');
+  speak(MODE === 'play'
+    ? 'Chào bé! Ở đây có một trăm ván cờ, khó dần lên từng chút một. Ván có vương miện là trận đấu với Thầy Rùa. Bé chạm vào quân cờ đang nhấp nháy để chơi nhé!'
+    : 'Chào bé! Mình là Thầy Rùa. Mỗi hòn đảo là một bài học nhỏ. Bé chạm vào hòn đảo có lá cờ đỏ để bắt đầu nhé!');
 };
 
 /* ================= Voice toggle ================= */
@@ -698,15 +1037,20 @@ function show(screen){
   window.scrollTo(0,0);
   if (screen === 'map'){ renderMap(); if (V.ok) speechSynthesis.cancel(); setTalking(false); }
 }
-function openLesson(i){
+function openRun(run){
   ac();
-  S.li = i; S.si = 0; S.mistakes = 0;
-  $('#lessonTitle').innerHTML = `<small>Đảo ${i+1}</small>${LESSONS[i].title}`;
+  RUN = run; S.si = 0; S.mistakes = 0;
+  $('#lessonTitle').innerHTML = `<small>${run.eyebrow}</small>${run.title}`;
   show('lesson');
   startStep();
 }
+const openLesson = i => openRun({ kind:'lesson', idx:i, steps:LESSONS[i].steps, eyebrow:`Đảo ${i+1}`, title:LESSONS[i].title });
+function openLevel(i){
+  const L = getLevel(i);
+  openRun({ kind:'level', idx:i, steps:[L.step], eyebrow:`Ván ${i+1} · ${WORLDS[L.wi].name}`, title:L.title });
+}
 function startStep(){
-  const L = LESSONS[S.li], st = L.steps[S.si];
+  const L = RUN, st = L.steps[S.si];
   const n = st.size || 5;
   S.step = st; S.board = makeBoard(n, st.b, st.w); S.base = cloneB(S.board);
   S.hints = (st.hints || []).map(p => pid(n,p));
@@ -715,7 +1059,8 @@ function startStep(){
   if (st.type === 'targets' && st.hint) S.hints = [...S.targets];
   S.found = new Set(); S.placed = 0; S.rounds = 0; S.last = -1; S.xmark = -1; S.poof = []; S.drop = -1;
   S.done = false; S.locked = false; S.over = false; S.showTerr = !!st.terr; S.warned = new Set();
-  $('#dots').innerHTML = L.steps.map((_,k) => `<i class="${k < S.si ? 'on' : k === S.si ? 'now' : ''}"></i>`).join('');
+  S.kidCaps = 0; S.aiCaps = 0;
+  $('#dots').innerHTML = L.steps.length < 2 ? '' : L.steps.map((_,k) => `<i class="${k < S.si ? 'on' : k === S.si ? 'now' : ''}"></i>`).join('');
   say(st.text);
   renderCtrl();
   renderTurn();
@@ -743,7 +1088,7 @@ function renderCtrl(){
   if (!S.done && !S.over && ['move','targets','game'].includes(st.type) && !(st.type === 'targets' && st.hint))
     h += `<button class="gbtn alt" data-a="hint">${ICON_BULB}Gợi ý</button>`;
   if (st.type === 'talk' || S.done){
-    const last = S.si === LESSONS[S.li].steps.length - 1;
+    const last = S.si === RUN.steps.length - 1;
     h += `<button class="gbtn go pulse" data-a="next">${last ? 'Hoàn thành' : 'Tiếp tục'}${ICON_GO}</button>`;
   }
   c.innerHTML = h;
@@ -771,9 +1116,7 @@ $('#backBtn').onclick = () => show('map');
 function hintFor(){
   const st = S.step, B = S.board, n = B.n;
   if (st.type === 'targets') return S.targets.filter(t => !S.found.has(t));
-  if (st.goal === 'point') return st.points.map(p => pid(n,p));
-  if (st.goal === 'escape') return [...groupAt(B, pid(n, st.save)).libs];
-  if (st.goal === 'capture') return groupsInAtari(B,2).flatMap(g => [...g.libs]);
+  if (st.type === 'move') return solutions(st, B);
   if (st.type === 'game'){
     const caps = groupsInAtari(B,2).flatMap(g => [...g.libs]).filter(l => play(B,l,1).ok);
     if (caps.length) return caps;
@@ -793,7 +1136,7 @@ function fail(msg, countIt = true){
   const b = $('#board'); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake');
 }
 function nextStep(){
-  if (S.si < LESSONS[S.li].steps.length - 1){ S.si++; startStep(); }
+  if (S.si < RUN.steps.length - 1){ S.si++; startStep(); }
   else finishLesson();
 }
 
@@ -926,11 +1269,7 @@ function onTap(i){
       const r = play(B, i, 1);
       if (!r.ok){ fail(illegalMsg(r.reason), false); return; }
       applyMove(r, i, 1); renderBoard();
-      let good = false;
-      if (st.goal === 'capture') good = r.captured.length > 0;
-      if (st.goal === 'escape') good = groupAt(S.board, pid(B.n, st.save)).libs.size >= 2;
-      if (st.goal === 'point') good = st.points.some(p => pid(B.n,p) === i);
-      if (good) success(st.done);
+      if (goalMet(st, r, i)) success(st.done);
       else {
         fail(st.fail); S.locked = true;
         setTimeout(() => { S.board = cloneB(S.base); S.last = -1; S.locked = false; renderBoard(); }, 1300);
@@ -947,28 +1286,44 @@ function renderTurn(){
   if (!st || !['game','alternate'].includes(st.type) || S.done || S.over){ c.hidden = true; return; }
   c.hidden = false;
   c.className = 'turnchip' + (S.locked ? ' white' : '');
-  c.innerHTML = S.locked ? '<b></b> Thầy Rùa đang nghĩ...' : '<b></b> Lượt của bé';
+  const need = st.need || 1;
+  const score = need > 1 ? ` · Bé ${S.kidCaps}/${need} · Rùa ${S.aiCaps}/${need}` : '';
+  c.innerHTML = (S.locked ? '<b></b> Thầy Rùa đang nghĩ...' : '<b></b> Lượt của bé') + score;
 }
 function gameTap(i){
+  const st = S.step, need = st.need || 1;
   const r = play(S.board, i, 1);
   if (!r.ok){ fail(illegalMsg(r.reason), false); return; }
   S.hints = [];
   applyMove(r, i, 1); renderBoard();
-  if (r.captured.length){ success(S.step.done); return; }
+  if (r.captured.length){
+    S.kidCaps += r.captured.length;
+    if (S.kidCaps >= need){ success(st.done); return; }
+    say(`Bé ăn được quân rồi! Ăn thêm ${need - S.kidCaps} quân nữa là thắng.`, 'good');
+  }
   S.locked = true; renderTurn(); renderCtrl();
   setTimeout(() => {
-    const k = aiMove(S.board, S.warned);
+    const k = aiMove(S.board, S.warned, st.ai);
     if (k < 0){ S.locked = false; S.over = true; say('Bàn cờ hết chỗ rồi. Chơi lại ván mới nhé!'); renderCtrl(); renderTurn(); return; }
     const rr = play(S.board, k, 2);
     applyMove(rr, k, 2); S.locked = false; renderBoard();
-    if (rr.captured.length){
-      S.over = true; S.mistakes++;
-      fail('Ôi, Thầy Rùa ăn được quân đen rồi! Không sao đâu, mình chơi lại ván mới nhé.', false);
-      renderCtrl(); renderTurn(); return;
-    }
-    renderTurn();
     const wA = groupsInAtari(S.board, 2), bA = groupsInAtari(S.board, 1);
     S.warned = new Set(bA.flatMap(g => g.stones));
+    if (rr.captured.length){
+      S.aiCaps += rr.captured.length;
+      if (S.aiCaps >= need){
+        S.over = true; S.mistakes++;
+        fail('Ôi, Thầy Rùa thắng ván này rồi! Không sao đâu, mình chơi lại ván mới nhé.', false);
+        renderCtrl(); renderTurn(); return;
+      }
+      renderTurn();
+      fail(`Thầy Rùa ăn mất ${rr.captured.length} quân đen. Bé vẫn còn cơ hội, cố lên!`, false);
+      return;
+    }
+    renderTurn();
+    let canMove = false;
+    for (let j = 0; j < S.board.g.length && !canMove; j++) if (!S.board.g[j] && play(S.board, j, 1).ok) canMove = true;
+    if (!canMove){ S.over = true; say('Bàn cờ hết chỗ rồi. Chơi lại ván mới nhé!'); renderCtrl(); renderTurn(); return; }
     if (wA.length && bA.length) say('Quân trắng chỉ còn 1 hơi thở, nhưng quân đen của bé cũng vậy! Bé ăn quân trắng ngay để thắng nhé.');
     else if (wA.length) say('Có quân trắng chỉ còn 1 hơi thở. Bé ăn được không?');
     else if (bA.length) say('Cẩn thận! Quân đen của bé chỉ còn 1 hơi thở. Bé đặt quân vào hơi thở cuối cùng để chạy thoát nhé!');
@@ -979,26 +1334,40 @@ function gameTap(i){
 /* ================= Finish ================= */
 function finishLesson(){
   const stars = S.mistakes === 0 ? 3 : S.mistakes <= 2 ? 2 : 1;
-  SAVE.stars[S.li] = Math.max(starsOf(S.li), stars); persist();
-  const hasNext = S.li < LESSONS.length - 1;
+  const isLesson = RUN.kind === 'lesson', idx = RUN.idx;
+  const bag = isLesson ? SAVE.stars : SAVE.lv;
+  bag[idx] = Math.max(bag[idx] || 0, stars); persist();
+  const hasNext = idx < (isLesson ? LESSONS.length : LEVEL_SPECS.length) - 1;
   const praise = stars === 3 ? 'Xuất sắc!' : stars === 2 ? 'Giỏi lắm!' : 'Bé đã cố gắng!';
+  let line, voice;
+  if (isLesson){
+    line = `Bé đã hoàn thành đảo ${idx+1}: ${RUN.title}.${hasNext ? ' Đảo tiếp theo đã mở!' : ' Bé đã đi hết các hòn đảo rồi!'}`;
+    voice = `${praise} Bé nhận được ${stars} ngôi sao. ${hasNext ? 'Đảo tiếp theo đã mở rồi!' : 'Bé đã trở thành kỳ thủ nhí của Đảo Cờ Vây!'}`;
+  } else {
+    const wi = LEVEL_SPECS[idx].wi, worldDone = !hasNext || LEVEL_SPECS[idx+1].wi !== wi;
+    line = !hasNext ? 'Bé đã chinh phục cả 100 ván cờ! Bé là nhà vô địch Đảo Cờ Vây!'
+      : worldDone ? `Bé đã chinh phục vùng ${WORLDS[wi].name}! Vùng ${WORLDS[wi+1].name} đã mở.`
+      : `Bé đã vượt qua ván ${idx+1}. Ván tiếp theo đã mở!`;
+    voice = `${praise} Bé nhận được ${stars} ngôi sao. ${worldDone ? line : ''}`;
+  }
   const box = $('#winBox');
   box.innerHTML = `<div class="card-win" role="dialog" aria-modal="true" aria-labelledby="winT">
     ${turtleSVG()}
     <h2 id="winT">${praise}</h2>
     <div class="stars">${[0,1,2].map(k => starSVG(k < stars)).join('')}</div>
-    <p>Bé đã hoàn thành đảo ${S.li+1}: ${LESSONS[S.li].title}.${hasNext ? ' Đảo tiếp theo đã mở!' : ' Bé đã đi hết các hòn đảo rồi!'}</p>
+    <p>${line}</p>
     <div class="row">
       <button class="gbtn alt" id="wMap">Về bản đồ</button>
-      ${hasNext ? `<button class="gbtn go pulse" id="wNext">Đảo tiếp theo${ICON_GO}</button>` : `<button class="gbtn go" id="wAgain">Chơi lại ván cờ</button>`}
+      ${hasNext ? `<button class="gbtn go pulse" id="wNext">${isLesson ? 'Đảo' : 'Ván'} tiếp theo${ICON_GO}</button>` : `<button class="gbtn go" id="wAgain">Chơi lại</button>`}
     </div></div>`;
   box.hidden = false;
   sfx.fanfare(); confetti();
-  speak(`${praise} Bé nhận được ${stars} ngôi sao. ${hasNext ? 'Đảo tiếp theo đã mở rồi!' : 'Bé đã trở thành kỳ thủ nhí của Đảo Cờ Vây!'}`);
+  speak(voice);
   const close = () => { box.hidden = true; };
+  const open = isLesson ? openLesson : openLevel;
   $('#wMap').onclick = () => { close(); show('map'); };
-  if (hasNext) $('#wNext').onclick = () => { close(); openLesson(S.li + 1); };
-  else $('#wAgain').onclick = () => { close(); openLesson(S.li); };
+  if (hasNext) $('#wNext').onclick = () => { close(); open(idx + 1); };
+  else $('#wAgain').onclick = () => { close(); open(idx); };
   $('#wMap').focus();
 }
 function confetti(){
