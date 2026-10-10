@@ -416,12 +416,14 @@ const LESSONS = [
       b:[[2,0],[2,1],[2,2],[2,3],[2,4]], w:[[3,0],[3,1],[3,2],[3,3],[3,4]], terr:true},
   ]},
   { title:'Trận đấu đầu tiên', sub:'Ai ăn quân trước thắng', steps:[
-    {type:'talk', size:7, text:'Bây giờ mình chơi thử một ván nhỏ nhé! Luật dành cho bạn mới: ai ăn được quân trước sẽ thắng.',
-      b:[[2,2],[3,3]], w:[[3,2],[2,3]]},
-    {type:'talk', size:7, text:'Bé cầm quân đen và đi trước. Nhớ để ý hơi thở của quân mình, và tìm quân trắng nào chỉ còn 1 hơi thở nhé!',
-      b:[[2,2],[3,3]], w:[[3,2],[2,3]]},
-    {type:'game', size:7, b:[[2,2],[3,3]], w:[[3,2],[2,3]],
-      text:'Đến lượt bé! Đặt quân đen vào giao điểm bất kỳ.',
+    {type:'talk', text:'Bây giờ mình chơi thử một ván nhỏ nhé! Luật dành cho bạn mới: ai ăn được quân trước sẽ thắng.',
+      b:[[1,1],[2,2]], w:[[2,1],[1,2]]},
+    {type:'talk', text:'Mẹo nhỏ: bé đặt quân sát quân trắng để lấy bớt hơi thở của nó. Khi quân trắng chỉ còn 1 hơi thở, bé ăn ngay!',
+      b:[[1,1],[2,2]], w:[[2,1],[1,2]], showLibs:[2,1]},
+    {type:'talk', text:'Nếu quân đen của bé gặp nguy, Thầy Rùa sẽ nhắc trước. Lúc nào bí, bé bấm nút Gợi ý nhé!',
+      b:[[1,1],[2,2]], w:[[2,1],[1,2]]},
+    {type:'game', b:[[1,1],[2,2]], w:[[2,1],[1,2]],
+      text:'Đến lượt bé! Bé thử đặt quân đen sát một quân trắng xem.',
       done:'Bé thắng rồi! Bé đã ăn được quân của Thầy Rùa!'},
   ]},
 ];
@@ -490,32 +492,34 @@ function groupsInAtari(B,c){
   }
   return out;
 }
-/* Friendly opponent for the capture game: takes captures, often escapes, otherwise plays near the action. */
-function aiMove(B){
+/* Gentle opponent for the capture game. It only captures black stones the child was already
+   warned about and then ignored, rarely runs away, and likes to play close to black stones,
+   which keeps leaving white stones for the child to capture. */
+function aiMove(B, warned){
   const n = B.n, legal = [];
   for (let i = 0; i < n*n; i++){ if (B.g[i] === 0){ const r = play(B,i,2); if (r.ok) legal.push([i,r]); } }
   if (!legal.length) return -1;
-  const cap = legal.find(([,r]) => r.captured.length);
-  if (cap) return cap[0];
+  const cap = legal.find(([,r]) => r.captured.some(s => warned.has(s)));
+  if (cap && Math.random() < 0.5) return cap[0];
   for (const gr of groupsInAtari(B,2)){
     const l = [...gr.libs][0], r = play(B,l,2);
-    if (r.ok && groupAt(r.board,l).libs.size >= 2 && Math.random() < 0.7) return l;
+    if (r.ok && !r.captured.length && groupAt(r.board,l).libs.size >= 2 && Math.random() < 0.3) return l;
   }
   let best = -1, bestS = -1e9;
   for (const [i,r] of legal){
+    if (r.captured.length) continue;
     const mine = groupAt(r.board,i).libs.size;
-    let s = mine * 0.6 + Math.random() * 3;
-    if (mine === 1) s -= 20;
+    let s = Math.random() * 3;
+    if (mine === 1) s -= 1.5;
     for (const k of nbrs(n,i)){
       if (r.board.g[k] === 1){
-        const L = groupAt(r.board,k).libs.size;
-        if (L === 1 && mine >= 2) s += 4; else if (L === 2) s += 1.5;
+        s += 1.2;
+        if (groupAt(r.board,k).libs.size === 1) s -= 2;
       }
-      if (B.g[k] !== 0) s += 0.8;
     }
     if (s > bestS){ bestS = s; best = i; }
   }
-  return best;
+  return best >= 0 ? best : legal[0][0];
 }
 
 /* ================= Voice & sound ================= */
@@ -710,7 +714,7 @@ function startStep(){
   S.targets = st.libsOf ? [...groupAt(S.board, pid(n, st.libsOf)).libs] : (st.targets || []).map(p => pid(n,p));
   if (st.type === 'targets' && st.hint) S.hints = [...S.targets];
   S.found = new Set(); S.placed = 0; S.rounds = 0; S.last = -1; S.xmark = -1; S.poof = []; S.drop = -1;
-  S.done = false; S.locked = false; S.over = false; S.showTerr = !!st.terr;
+  S.done = false; S.locked = false; S.over = false; S.showTerr = !!st.terr; S.warned = new Set();
   $('#dots').innerHTML = L.steps.map((_,k) => `<i class="${k < S.si ? 'on' : k === S.si ? 'now' : ''}"></i>`).join('');
   say(st.text);
   renderCtrl();
@@ -736,7 +740,7 @@ function renderCtrl(){
     h = `<div class="quiz">${st.options.map((o,k) => `<button class="gbtn" data-a="opt" data-k="${k}">${o.label}</button>`).join('')}</div>` + h;
   }
   if (st.type === 'game' && S.over && !S.done) h += `<button class="gbtn red pulse" data-a="retry">Chơi lại ván mới</button>`;
-  if (!S.done && ['move','targets'].includes(st.type) && !(st.type === 'targets' && st.hint))
+  if (!S.done && !S.over && ['move','targets','game'].includes(st.type) && !(st.type === 'targets' && st.hint))
     h += `<button class="gbtn alt" data-a="hint">${ICON_BULB}Gợi ý</button>`;
   if (st.type === 'talk' || S.done){
     const last = S.si === LESSONS[S.li].steps.length - 1;
@@ -750,7 +754,12 @@ $('#ctrl').addEventListener('click', e => {
   const a = b.dataset.a, st = S.step;
   if (a === 'again') speak($('#sayText').textContent);
   if (a === 'next') nextStep();
-  if (a === 'hint'){ S.hints = hintFor(); renderBoard(); say('Bé nhìn chỗ đang nhấp nháy nhé!'); }
+  if (a === 'hint'){
+    S.hints = hintFor(); renderBoard();
+    if (S.hints.length) say(st.type === 'game' && groupsInAtari(S.board,2).length
+      ? 'Quân trắng này chỉ còn 1 hơi thở. Bé đặt vào chỗ nhấp nháy để ăn nó!' : 'Bé nhìn chỗ đang nhấp nháy nhé!');
+    else say('Chưa có quân trắng nào sắp bị ăn. Bé đặt quân sát quân trắng để lấy bớt hơi thở của nó nhé.');
+  }
   if (a === 'retry') startStep();
   if (a === 'opt'){
     const o = st.options[+b.dataset.k];
@@ -765,6 +774,12 @@ function hintFor(){
   if (st.goal === 'point') return st.points.map(p => pid(n,p));
   if (st.goal === 'escape') return [...groupAt(B, pid(n, st.save)).libs];
   if (st.goal === 'capture') return groupsInAtari(B,2).flatMap(g => [...g.libs]);
+  if (st.type === 'game'){
+    const caps = groupsInAtari(B,2).flatMap(g => [...g.libs]).filter(l => play(B,l,1).ok);
+    if (caps.length) return caps;
+    return groupsInAtari(B,1).flatMap(g => [...g.libs])
+      .filter(l => { const r = play(B,l,1); return r.ok && groupAt(r.board,l).libs.size >= 2; });
+  }
   return [];
 }
 function success(msg){
@@ -937,11 +952,12 @@ function renderTurn(){
 function gameTap(i){
   const r = play(S.board, i, 1);
   if (!r.ok){ fail(illegalMsg(r.reason), false); return; }
+  S.hints = [];
   applyMove(r, i, 1); renderBoard();
   if (r.captured.length){ success(S.step.done); return; }
-  S.locked = true; renderTurn();
+  S.locked = true; renderTurn(); renderCtrl();
   setTimeout(() => {
-    const k = aiMove(S.board);
+    const k = aiMove(S.board, S.warned);
     if (k < 0){ S.locked = false; S.over = true; say('Bàn cờ hết chỗ rồi. Chơi lại ván mới nhé!'); renderCtrl(); renderTurn(); return; }
     const rr = play(S.board, k, 2);
     applyMove(rr, k, 2); S.locked = false; renderBoard();
@@ -952,8 +968,10 @@ function gameTap(i){
     }
     renderTurn();
     const wA = groupsInAtari(S.board, 2), bA = groupsInAtari(S.board, 1);
-    if (wA.length) say('Có quân trắng chỉ còn 1 hơi thở. Bé ăn được không?');
-    else if (bA.length) say('Cẩn thận! Quân đen của bé chỉ còn 1 hơi thở. Bé chạy thoát đi!');
+    S.warned = new Set(bA.flatMap(g => g.stones));
+    if (wA.length && bA.length) say('Quân trắng chỉ còn 1 hơi thở, nhưng quân đen của bé cũng vậy! Bé ăn quân trắng ngay để thắng nhé.');
+    else if (wA.length) say('Có quân trắng chỉ còn 1 hơi thở. Bé ăn được không?');
+    else if (bA.length) say('Cẩn thận! Quân đen của bé chỉ còn 1 hơi thở. Bé đặt quân vào hơi thở cuối cùng để chạy thoát nhé!');
     else $('#sayText').textContent = 'Đến lượt bé! Tìm quân trắng nào có ít hơi thở nhất nhé.';
   }, 800);
 }
