@@ -1,0 +1,1004 @@
+<title>Đảo Cờ Vây</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800&display=swap">
+<style>
+/* Layout: an ocean map where each lesson is an island on a winding path; inside a lesson, Thầy Rùa coaches beside a wooden 5x5/7x7 board (stacked on phones). Single bright world by design. */
+:root{
+  color-scheme: light;
+  --sea:#2fa4d9; --sea-deep:#0f5f8f; --foam:#e6f7ff;
+  --sand:#ffe3a1; --sand-dark:#e9bf62;
+  --wood:#efc072; --line:#5b3a17;
+  --ink:#1d2b44; --ink-soft:#4b5b77;
+  --card:#fffaf0;
+  --sun:#ffc83a; --sun-dark:#d99512;
+  --leaf:#39b864; --leaf-dark:#23894a;
+  --coral:#ff6f59; --coral-dark:#cf4733;
+  --bubble:#bfe9ff;
+  --display:"Baloo 2","Comic Sans MS","Trebuchet MS",system-ui,sans-serif;
+  --body:"Nunito",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --r-lg:28px; --r-md:18px;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{
+  margin:0; font-family:var(--body); color:var(--ink);
+  background-color:var(--sea);
+  background-image:
+    radial-gradient(ellipse 60px 10px at 20% 30%, rgba(255,255,255,.18) 50%, transparent 52%),
+    radial-gradient(ellipse 50px 8px at 75% 60%, rgba(255,255,255,.14) 50%, transparent 52%),
+    radial-gradient(ellipse 40px 7px at 45% 85%, rgba(255,255,255,.12) 50%, transparent 52%),
+    linear-gradient(180deg, #48b8e8 0%, var(--sea) 40%, #2392c9 100%);
+  background-size: 340px 260px, 300px 240px, 280px 300px, 100% 100%;
+  background-attachment: scroll, scroll, scroll, fixed;
+  -webkit-tap-highlight-color: transparent;
+}
+button{font:inherit; color:inherit; cursor:pointer}
+button:focus-visible{outline:4px solid var(--ink); outline-offset:3px}
+h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0; line-height:1.05}
+
+/* ---------- Header ---------- */
+.top{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:20;
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  padding:10px 16px;
+  background:rgba(15,95,143,.88); backdrop-filter:blur(6px);
+  color:#fff;
+}
+.brand{display:flex; align-items:center; gap:10px; margin-right:auto}
+.brand-mark{width:38px; height:38px}
+.brand h1{font-size:1.6rem; letter-spacing:.2px; color:#fff}
+.brand h1 span{color:var(--sun)}
+.chip{
+  display:inline-flex; align-items:center; gap:6px;
+  background:rgba(255,255,255,.16); border:2px solid rgba(255,255,255,.3);
+  padding:5px 12px; border-radius:999px; font-weight:800; font-variant-numeric:tabular-nums; color:#fff;
+}
+.chip svg{width:20px; height:20px}
+.chip.btn{cursor:pointer}
+.chip.btn[aria-pressed="false"]{opacity:.65}
+
+/* ---------- Game buttons ---------- */
+.gbtn{
+  --c:var(--sun); --cd:var(--sun-dark); --t:var(--ink);
+  border:0; border-radius:var(--r-md); padding:12px 22px;
+  background:var(--c); color:var(--t);
+  font-family:var(--display); font-weight:800; font-size:1.2rem; letter-spacing:.3px;
+  box-shadow:0 6px 0 var(--cd), 0 10px 18px rgba(0,0,0,.18);
+  transition:transform .08s, box-shadow .08s;
+  display:inline-flex; align-items:center; gap:8px; justify-content:center;
+  min-height:52px;
+}
+.gbtn:active{transform:translateY(4px); box-shadow:0 2px 0 var(--cd), 0 4px 8px rgba(0,0,0,.15)}
+.gbtn.go{--c:var(--leaf); --cd:var(--leaf-dark); --t:#fff}
+.gbtn.alt{--c:#fff; --cd:#b9c6d6; --t:var(--ink)}
+.gbtn.red{--c:var(--coral); --cd:var(--coral-dark); --t:#fff}
+.gbtn svg{width:22px; height:22px; flex:none}
+.gbtn.pulse{animation:pulse 1.4s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.05)}}
+
+/* ---------- Map screen ---------- */
+.wrap{max-width:980px; margin:0 auto; padding-inline:16px; padding-block:20px 60px}
+.hero{
+  display:grid; grid-template-columns:auto minmax(0,1fr); gap:18px; align-items:center;
+  background:var(--sand); border-radius:var(--r-lg); padding:18px 22px;
+  box-shadow:0 0 0 8px rgba(255,255,255,.35), 0 18px 30px rgba(8,60,95,.35);
+}
+.hero .turtle{width:150px}
+.hero h2{font-size:clamp(1.7rem,4.5vw,2.5rem); color:var(--ink)}
+.hero p{font-size:1.12rem; line-height:1.5; margin:8px 0 14px; max-width:58ch; color:var(--ink-soft); font-weight:700}
+.hero .row{display:flex; flex-wrap:wrap; gap:12px}
+.note{margin-top:10px; font-size:.92rem; color:var(--coral-dark); font-weight:800}
+@media (max-width:560px){
+  .hero{grid-template-columns:1fr; text-align:center; justify-items:center}
+  .hero .turtle{width:120px}
+  .hero .row{justify-content:center}
+}
+
+.map{position:relative; margin-top:34px; padding-block:10px 20px}
+.map > svg.path{position:absolute; inset:0; pointer-events:none; overflow:visible}
+.isles{position:relative; display:flex; flex-direction:column; gap:26px}
+.isle{
+  width:190px; margin-left:calc((100% - 190px) * var(--off));
+  display:flex; flex-direction:column; align-items:center; gap:6px; text-align:center;
+}
+.isle-btn{
+  position:relative; width:112px; height:112px; border-radius:50%; border:0; padding:0;
+  background:radial-gradient(circle at 50% 42%, #fff1c9 0 45%, var(--sand) 46% 70%, var(--sand-dark) 71%);
+  box-shadow:0 0 0 10px rgba(255,255,255,.28), 0 0 0 20px rgba(255,255,255,.12), 0 12px 0 rgba(8,60,95,.25);
+  transition:transform .15s;
+}
+.isle-btn:hover:not(:disabled){transform:translateY(-4px) rotate(-3deg)}
+.isle-btn:disabled{cursor:not-allowed; filter:saturate(.35) brightness(.92)}
+.isle-btn .stone{
+  position:absolute; left:50%; top:46%; translate:-50% -50%;
+  width:62px; height:62px; border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #5a6378, #12151c 70%);
+  box-shadow:0 5px 0 rgba(0,0,0,.25);
+  display:grid; place-items:center;
+  font-family:var(--display); font-weight:800; font-size:2rem; color:#fff; line-height:1;
+}
+.isle-btn.done .stone{background:radial-gradient(circle at 35% 30%, #fff, #dfe4ea 70%); color:var(--ink)}
+.isle-btn:disabled .stone{background:radial-gradient(circle at 35% 30%, #c5ccd6, #8a94a3 70%)}
+.isle-btn .stone svg{width:28px; height:28px}
+.isle-btn .flag{
+  position:absolute; right:-6px; top:-14px; width:40px; height:48px;
+  animation:bob 1.6s ease-in-out infinite;
+}
+@keyframes bob{50%{transform:translateY(-6px)}}
+.isle h3{font-size:1.25rem; color:#fff; text-shadow:0 2px 0 rgba(8,60,95,.5)}
+.isle .sub{font-size:.9rem; font-weight:800; color:var(--foam); opacity:.95}
+.stars{display:flex; gap:2px; justify-content:center}
+.stars svg{width:24px; height:24px}
+
+/* ---------- Lesson screen ---------- */
+.lesson-top{display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px}
+.lesson-top h2{font-size:clamp(1.4rem,4vw,2rem); color:#fff; text-shadow:0 3px 0 rgba(8,60,95,.45); margin-right:auto; min-width:0}
+.lesson-top h2 small{display:block; font-size:.95rem; font-family:var(--body); font-weight:800; color:var(--sun); text-shadow:none; letter-spacing:.6px; text-transform:uppercase}
+.dots{display:flex; gap:6px; flex-wrap:wrap}
+.dots i{width:14px; height:14px; border-radius:50%; background:rgba(255,255,255,.35); border:2px solid rgba(255,255,255,.6)}
+.dots i.on{background:var(--sun); border-color:#fff}
+.dots i.now{background:#fff; transform:scale(1.25)}
+
+.stage{
+  display:grid; gap:18px 26px;
+  grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);
+  grid-template-areas:"coach board" "ctrl board";
+  align-items:start;
+}
+.coach{grid-area:coach; display:flex; flex-direction:column; align-items:flex-start; gap:6px}
+.coach .turtle{width:150px; margin-left:12px}
+.say{
+  position:relative; background:#fff; border-radius:var(--r-lg); padding:18px 20px;
+  font-size:1.25rem; line-height:1.5; font-weight:700; color:var(--ink);
+  box-shadow:0 0 0 5px var(--bubble), 0 14px 24px rgba(8,60,95,.3);
+  width:100%; min-height:110px;
+}
+.say::before{
+  content:""; position:absolute; left:64px; top:-14px; width:28px; height:28px;
+  background:#fff; transform:rotate(45deg); border-radius:4px;
+  box-shadow:-5px -5px 0 0 var(--bubble);
+}
+.say.good{box-shadow:0 0 0 5px var(--leaf), 0 14px 24px rgba(8,60,95,.3)}
+.say.good::before{box-shadow:-5px -5px 0 0 var(--leaf)}
+.say.oops{box-shadow:0 0 0 5px var(--coral), 0 14px 24px rgba(8,60,95,.3)}
+.say.oops::before{box-shadow:-5px -5px 0 0 var(--coral)}
+.say p{margin:0; position:relative}
+.say .fresh{animation:pop .35s ease-out}
+@keyframes pop{from{opacity:0; transform:translateY(6px)}}
+
+.ctrl{grid-area:ctrl; display:flex; flex-wrap:wrap; gap:12px}
+.ctrl .quiz{display:flex; flex-wrap:wrap; gap:12px; width:100%}
+
+.board-area{grid-area:board; position:relative}
+.turnchip{
+  position:absolute; left:50%; top:-14px; translate:-50% 0; z-index:2;
+  background:var(--ink); color:#fff; font-weight:800; padding:4px 14px; border-radius:999px; font-size:.95rem;
+  display:flex; align-items:center; gap:8px; white-space:nowrap;
+}
+.turnchip b{display:inline-block; width:14px; height:14px; border-radius:50%; background:#111; box-shadow:0 0 0 2px #fff}
+.turnchip.white b{background:#fff; box-shadow:0 0 0 2px #999}
+#board{width:100%; max-width:540px; margin-inline:auto; aspect-ratio:1; touch-action:manipulation}
+#board svg{width:100%; height:100%; display:block; user-select:none}
+#board.shake{animation:shake .4s}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+
+@media (max-width:760px){
+  .stage{grid-template-columns:minmax(0,1fr); grid-template-areas:"coach" "board" "ctrl"}
+  .coach{flex-direction:row; align-items:center; gap:10px}
+  .coach .turtle{width:84px; margin-left:0; flex:none}
+  .say{font-size:1.08rem; padding:14px 16px; min-height:0}
+  .say::before{left:-12px; top:28px; box-shadow:-5px 5px 0 0 var(--bubble)}
+  .say.good::before{box-shadow:-5px 5px 0 0 var(--leaf)}
+  .say.oops::before{box-shadow:-5px 5px 0 0 var(--coral)}
+  .ctrl{justify-content:center}
+}
+
+/* Board SVG pieces */
+.hint{animation:glow 1.1s ease-in-out infinite; transform-box:fill-box; transform-origin:center}
+@keyframes glow{50%{opacity:.35; transform:scale(1.25)}}
+.drop{animation:drop .28s cubic-bezier(.3,1.6,.6,1); transform-box:fill-box; transform-origin:center}
+@keyframes drop{from{transform:scale(1.6); opacity:.2}}
+.poof{animation:poof .55s ease-out forwards; transform-box:fill-box; transform-origin:center}
+@keyframes poof{to{transform:scale(1.8) rotate(25deg); opacity:0}}
+.bub{animation:bubin .35s cubic-bezier(.3,1.6,.6,1); transform-box:fill-box; transform-origin:center}
+@keyframes bubin{from{transform:scale(0)}}
+
+/* Turtle */
+.turtle{display:block; height:auto; overflow:visible}
+.turtle .mouth-open{display:none}
+.turtle.talking .mouth-open{display:inline; animation:talk .22s ease-in-out infinite alternate; transform-box:fill-box; transform-origin:center}
+.turtle.talking .mouth-smile{display:none}
+@keyframes talk{to{transform:scaleY(.35)}}
+.turtle .body{transform-origin:70px 100px}
+.turtle.happy .body{animation:hop .5s ease-out 2}
+@keyframes hop{40%{transform:translateY(-16px) rotate(-4deg)}}
+.turtle.sad .body{animation:wobble .5s ease-in-out}
+@keyframes wobble{30%{transform:rotate(-6deg)}70%{transform:rotate(5deg)}}
+.turtle .eyes{animation:blink 4s infinite; transform-box:fill-box; transform-origin:center}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+
+/* Finish overlay */
+.overlay{
+  position:fixed; inset:0; z-index:50; display:grid; place-items:center; padding:16px;
+  background:rgba(10,50,80,.6);
+}
+.card-win{
+  width:min(460px,100%); background:var(--card); border-radius:var(--r-lg); padding:26px 22px 24px; text-align:center;
+  box-shadow:0 0 0 8px var(--sun), 0 30px 60px rgba(0,0,0,.35);
+  animation:rise .45s cubic-bezier(.3,1.5,.6,1);
+}
+@keyframes rise{from{transform:translateY(40px) scale(.9); opacity:0}}
+.card-win h2{font-size:2.2rem; color:var(--ink)}
+.card-win p{font-size:1.1rem; font-weight:700; color:var(--ink-soft); margin:6px 0 16px}
+.card-win .stars svg{width:64px; height:64px}
+.card-win .stars svg{animation:starin .5s cubic-bezier(.3,1.7,.5,1) backwards}
+.card-win .stars svg:nth-child(2){animation-delay:.25s}
+.card-win .stars svg:nth-child(3){animation-delay:.5s}
+@keyframes starin{from{transform:scale(0) rotate(-90deg)}}
+.card-win .turtle{width:110px; margin:0 auto 4px}
+.card-win .row{display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:18px}
+#confetti{position:fixed; inset:0; pointer-events:none; z-index:60}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition:none !important}
+}
+</style>
+
+<!-- Shared SVG defs (gradients for stones/board, turtle shell clip) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <radialGradient id="gB" cx="35%" cy="30%" r="70%">
+      <stop offset="0" stop-color="#6b7488"/><stop offset=".45" stop-color="#22262f"/><stop offset="1" stop-color="#07080b"/>
+    </radialGradient>
+    <radialGradient id="gW" cx="35%" cy="30%" r="75%">
+      <stop offset="0" stop-color="#ffffff"/><stop offset=".6" stop-color="#eef1f4"/><stop offset="1" stop-color="#bfc6cf"/>
+    </radialGradient>
+    <linearGradient id="gWood" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6cf86"/><stop offset=".5" stop-color="#efc072"/><stop offset="1" stop-color="#e2a957"/>
+    </linearGradient>
+    <radialGradient id="gBub" cx="35%" cy="30%" r="70%">
+      <stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#bfe9ff"/><stop offset="1" stop-color="#55b8ec"/>
+    </radialGradient>
+    <clipPath id="shellClip"><path d="M24 86 Q28 38 64 36 Q100 38 100 86 Z"/></clipPath>
+  </defs>
+</svg>
+
+<header class="top">
+  <div class="brand">
+    <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true"><circle cx="15" cy="20" r="12" fill="url(#gB)"/><circle cx="26" cy="20" r="12" fill="url(#gW)"/></svg>
+    <h1>Đảo <span>Cờ Vây</span></h1>
+  </div>
+  <span class="chip" id="starTotal" title="Số sao bé đã nhận"></span>
+  <button class="chip btn" id="voiceBtn" aria-pressed="true" title="Bật hoặc tắt giọng đọc"></button>
+</header>
+
+<main class="wrap">
+  <section id="mapScreen">
+    <div class="hero">
+      <div id="heroTurtle"></div>
+      <div>
+        <h2>Chào bé! Mình là Thầy Rùa</h2>
+        <p>Mỗi hòn đảo là một bài học nhỏ. Bé học xong đảo này sẽ mở được đảo tiếp theo, và nhận sao vàng thật nhiều nhé!</p>
+        <div class="row">
+          <button class="gbtn go pulse" id="playNext"></button>
+          <button class="gbtn alt" id="hello"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>Nghe Thầy Rùa</button>
+        </div>
+        <div class="note" id="voiceNote" hidden></div>
+      </div>
+    </div>
+    <div class="map" id="map">
+      <svg class="path" id="mapPath"></svg>
+      <div class="isles" id="isles"></div>
+    </div>
+  </section>
+
+  <section id="lessonScreen" hidden>
+    <div class="lesson-top">
+      <button class="gbtn alt" id="backBtn"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Bản đồ</button>
+      <h2 id="lessonTitle"></h2>
+      <div class="dots" id="dots"></div>
+    </div>
+    <div class="stage">
+      <div class="coach">
+        <div id="coachTurtle"></div>
+        <div class="say" id="say" aria-live="polite"><p id="sayText"></p></div>
+      </div>
+      <div class="board-area">
+        <div class="turnchip" id="turnChip" hidden></div>
+        <div id="board"></div>
+      </div>
+      <div class="ctrl" id="ctrl"></div>
+    </div>
+  </section>
+</main>
+
+<div class="overlay" id="winBox" hidden></div>
+<canvas id="confetti" hidden></canvas>
+
+<script>
+/* ================= Lessons ================= */
+const LESSONS = [
+  { title:'Bàn cờ thần kỳ', sub:'Đặt quân ở giao điểm', steps:[
+    {type:'talk', text:'Chào bé! Mình là Thầy Rùa. Hôm nay chúng mình cùng khám phá trò chơi cờ vây nhé!'},
+    {type:'talk', text:'Đây là bàn cờ. Bàn cờ có các đường kẻ ngang và đường kẻ dọc. Chỗ hai đường kẻ gặp nhau gọi là giao điểm.', hints:[[1,1],[3,1],[2,3]]},
+    {type:'talk', text:'Quân cờ luôn được đặt lên giao điểm, chứ không đặt vào trong ô vuông nhé.', b:[[2,2]], w:[[1,3]]},
+    {type:'targets', marker:'stone', hint:true, soft:true, targets:[[0,0],[2,2],[4,1]],
+      text:'Bé hãy chạm vào 3 điểm đang nhấp nháy để đặt quân đen nhé!',
+      wrong:'Bé chạm vào điểm đang nhấp nháy nhé.', done:'Giỏi quá! Bé đặt quân rất đúng chỗ.'},
+    {type:'free', count:3, text:'Bây giờ bé tự chọn 3 giao điểm bất kỳ và đặt quân đen nhé.', done:'Tuyệt vời! Bé đã biết đặt quân cờ rồi.'},
+  ]},
+  { title:'Đen đi trước', sub:'Thay phiên nhau đi', steps:[
+    {type:'talk', text:'Cờ vây có hai màu quân: quân đen và quân trắng. Hai người chơi, mỗi người cầm một màu.', b:[[1,2]], w:[[3,2]]},
+    {type:'talk', text:'Quân đen luôn được đi trước. Sau đó hai bên thay phiên nhau, mỗi lượt chỉ đặt một quân.'},
+    {type:'talk', text:'Quân cờ đã đặt xuống thì nằm yên ở đó, không được di chuyển đi chỗ khác.', b:[[2,2]], w:[[2,1]]},
+    {type:'alternate', rounds:3, text:'Bé cầm quân đen và đi trước. Rồi đến lượt Thầy Rùa. Chúng mình đi 3 lượt nhé!',
+      done:'Bé đã biết thay phiên nhau rồi đó. Giỏi lắm!'},
+  ]},
+  { title:'Hơi thở của quân', sub:'Tìm khí của quân cờ', steps:[
+    {type:'talk', text:'Mỗi quân cờ cần hơi thở để sống, giống như chúng mình vậy. Trong cờ vây, hơi thở gọi là khí.', b:[[2,2]], showLibs:[2,2]},
+    {type:'talk', text:'Hơi thở là các giao điểm trống nằm sát quân cờ theo đường kẻ: trên, dưới, trái, phải. Đường chéo không tính đâu nhé!', b:[[2,2]], showLibs:[2,2]},
+    {type:'targets', marker:'bubble', b:[[2,2]], libsOf:[2,2],
+      text:'Quân đen này nằm giữa bàn. Bé hãy chạm vào tất cả hơi thở của nó.',
+      wrong:'Chưa đúng rồi. Hơi thở phải nằm sát quân cờ, theo đường kẻ.', done:'Đúng rồi! Quân ở giữa bàn có 4 hơi thở.'},
+    {type:'targets', marker:'bubble', b:[[2,0]], libsOf:[2,0],
+      text:'Quân này nằm ở cạnh bàn. Bé chạm vào từng hơi thở của nó nhé.',
+      wrong:'Chưa đúng. Bé nhìn các giao điểm sát quân đen nhé.', done:'Chính xác! Ở cạnh bàn, quân cờ chỉ có 3 hơi thở.'},
+    {type:'targets', marker:'bubble', b:[[0,0]], libsOf:[0,0],
+      text:'Còn quân nằm ở góc bàn thì sao? Bé tìm hơi thở của nó nhé.',
+      wrong:'Chưa đúng. Ở góc bàn chỉ có ít hơi thở thôi.', done:'Giỏi quá! Ở góc bàn chỉ có 2 hơi thở.'},
+    {type:'targets', marker:'bubble', b:[[2,2]], w:[[2,1]], libsOf:[2,2],
+      text:'Quân trắng đang đứng chặn một hơi thở. Bé tìm các hơi thở còn lại của quân đen nhé.',
+      wrong:'Chưa đúng. Hơi thở phải là giao điểm còn trống.', done:'Giỏi lắm! Quân trắng lấy mất 1 hơi thở, nên quân đen chỉ còn 3.'},
+  ]},
+  { title:'Ăn quân', sub:'Lấp hết hơi thở', steps:[
+    {type:'talk', text:'Nếu bé lấp hết hơi thở của quân đối thủ, quân đó bị bắt và nhấc ra khỏi bàn. Đó gọi là ăn quân!',
+      w:[[2,2]], b:[[2,1],[1,2],[3,2]], hints:[[2,3]]},
+    {type:'talk', text:'Quân trắng này chỉ còn 1 hơi thở thôi. Quân cờ chỉ còn 1 hơi thở là đang gặp nguy hiểm, người ta gọi là bị Atari.',
+      w:[[2,2]], b:[[2,1],[1,2],[3,2]], showLibs:[2,2]},
+    {type:'move', goal:'capture', w:[[2,2]], b:[[2,1],[1,2],[3,2]],
+      text:'Bé hãy đặt một quân đen để ăn quân trắng nào!',
+      done:'Hay quá! Bé ăn được quân đầu tiên rồi!', fail:'Chưa ăn được. Bé tìm hơi thở cuối cùng của quân trắng nhé.'},
+    {type:'move', goal:'capture', w:[[2,0]], b:[[1,0],[2,1]],
+      text:'Quân trắng ở cạnh bàn còn 1 hơi thở. Bé ăn nó đi!',
+      done:'Chính xác! Ở cạnh bàn ăn quân nhanh hơn.', fail:'Chưa đúng. Hơi thở cuối cùng nằm sát quân trắng đó.'},
+    {type:'move', goal:'capture', w:[[0,0]], b:[[1,0]],
+      text:'Quân trắng ở góc bàn. Bé chỉ cần một nước để ăn nó!',
+      done:'Tuyệt! Ở góc bàn, quân cờ rất dễ bị ăn.', fail:'Chưa đúng. Quân ở góc chỉ có 2 hơi thở, một cái đã bị chặn rồi.'},
+    {type:'move', goal:'capture', w:[[1,1],[3,3]], b:[[1,0],[0,1],[2,1],[3,2],[2,3]],
+      text:'Có hai quân trắng. Bé tìm quân nào chỉ còn 1 hơi thở và ăn nó nhé!',
+      done:'Bé tinh mắt quá! Quân trắng kia vẫn còn 2 hơi thở nên chưa ăn được.', fail:'Chưa ăn được. Bé đếm hơi thở của từng quân trắng nhé.'},
+  ]},
+  { title:'Chạy thoát', sub:'Cứu quân bị Atari', steps:[
+    {type:'talk', text:'Ôi không! Quân đen của bé chỉ còn 1 hơi thở. Nếu không cứu, quân trắng sẽ ăn mất.',
+      b:[[2,2]], w:[[2,1],[1,2],[3,2]], showLibs:[2,2]},
+    {type:'talk', text:'Cách cứu là đặt thêm quân đen vào hơi thở cuối cùng để nối dài ra. Quân đen sẽ có thêm hơi thở mới!',
+      b:[[2,2]], w:[[2,1],[1,2],[3,2]], hints:[[2,3]]},
+    {type:'move', goal:'escape', save:[2,2], b:[[2,2]], w:[[2,1],[1,2],[3,2]],
+      text:'Bé hãy cứu quân đen nào!',
+      done:'Thoát rồi! Bây giờ hai quân đen nắm tay nhau, có tới 3 hơi thở.', fail:'Chưa thoát được. Bé đặt quân vào hơi thở cuối cùng của quân đen nhé.'},
+    {type:'move', goal:'escape', save:[0,2], b:[[0,2]], w:[[0,1],[1,2]],
+      text:'Quân đen ở cạnh bàn đang gặp nguy. Bé cứu nó nhé!',
+      done:'Giỏi lắm! Quân đen đã có thêm hơi thở.', fail:'Chưa đúng. Quân đen chỉ còn một hơi thở, bé tìm nó nhé.'},
+    {type:'move', goal:'escape', save:[2,1], b:[[2,1]], w:[[2,0],[1,1],[3,1]],
+      text:'Thêm một quân đen bị vây ba phía. Bé chạy thoát đi!',
+      done:'Tuyệt vời! Bé biết cách chạy thoát rồi.', fail:'Chưa thoát được. Chạy về phía còn trống nhé.'},
+  ]},
+  { title:'Đoàn kết', sub:'Quân nối thành nhóm', steps:[
+    {type:'talk', text:'Các quân cùng màu nằm sát nhau theo đường kẻ sẽ nắm tay nhau thành một nhóm. Cả nhóm dùng chung hơi thở.',
+      b:[[1,2],[2,2]], showLibs:[1,2]},
+    {type:'targets', marker:'bubble', b:[[1,2],[2,2]], libsOf:[1,2],
+      text:'Bé hãy tìm tất cả hơi thở của nhóm hai quân đen này.',
+      wrong:'Chưa đúng. Hơi thở phải nằm sát một quân trong nhóm.', done:'Đúng rồi! Nhóm hai quân có tới 6 hơi thở. Đoàn kết thì mạnh hơn!'},
+    {type:'move', goal:'capture', w:[[2,2],[3,2]], b:[[1,2],[2,1],[3,1],[4,2],[3,3]],
+      text:'Nhóm hai quân trắng chỉ còn 1 hơi thở. Bé ăn cả nhóm nhé!',
+      done:'Ồ! Bé ăn được 2 quân cùng một lúc!', fail:'Chưa đúng. Bé tìm hơi thở cuối cùng của cả nhóm trắng nhé.'},
+    {type:'move', goal:'capture', w:[[1,1],[1,2],[1,3]], b:[[1,0],[0,1],[0,2],[0,3],[2,1],[2,2],[2,3]],
+      text:'Ba quân trắng nắm tay nhau, nhưng chỉ còn 1 hơi thở. Bé ăn hết đi!',
+      done:'Ba quân một lúc! Bé đúng là cao thủ nhí!', fail:'Chưa đúng. Hơi thở cuối cùng ở đầu kia của nhóm trắng đó.'},
+  ]},
+  { title:'Vây đất', sub:'Ai nhiều đất hơn', steps:[
+    {type:'talk', text:'Mục tiêu của cờ vây là vây được nhiều đất. Đất là những giao điểm trống được quân của mình rào kín xung quanh.',
+      b:[[2,0],[2,1],[2,2],[2,3],[2,4]], w:[[3,0],[3,1],[3,2],[3,3],[3,4]], terr:true},
+    {type:'talk', text:'Quân đen rào được phía bên trái. Quân trắng rào được phía bên phải. Các ô vuông nhỏ là đất của mỗi bên.',
+      b:[[2,0],[2,1],[2,2],[2,3],[2,4]], w:[[3,0],[3,1],[3,2],[3,3],[3,4]], terr:true},
+    {type:'quiz', b:[[2,0],[2,1],[2,2],[2,3],[2,4]], w:[[3,0],[3,1],[3,2],[3,3],[3,4]], terr:true,
+      text:'Bé đếm thử xem: bên nào có nhiều đất hơn?',
+      options:[{label:'Quân đen', ok:true},{label:'Quân trắng'},{label:'Bằng nhau'}],
+      done:'Đúng rồi! Đen có 10 điểm đất, trắng chỉ có 5 điểm.', fail:'Chưa đúng. Bé đếm lại các ô vuông nhỏ của mỗi bên nhé.'},
+    {type:'move', goal:'point', points:[[2,2]], b:[[2,0],[2,1],[2,3],[2,4]], w:[[3,0],[3,1],[3,2],[3,3],[3,4]],
+      text:'Hàng rào của quân đen còn một lỗ hổng. Bé đặt quân để rào kín đất nhé!',
+      done:'Hàng rào đã kín. Đất của quân đen an toàn rồi!', fail:'Chưa đúng. Bé tìm chỗ hàng rào đen bị hở nhé.', terrAfter:true},
+    {type:'talk', text:'Ván cờ kết thúc khi hai bên không còn chỗ tốt để đi. Bên nào vây được nhiều đất hơn sẽ thắng!',
+      b:[[2,0],[2,1],[2,2],[2,3],[2,4]], w:[[3,0],[3,1],[3,2],[3,3],[3,4]], terr:true},
+  ]},
+  { title:'Trận đấu đầu tiên', sub:'Ai ăn quân trước thắng', steps:[
+    {type:'talk', size:7, text:'Bây giờ mình chơi thử một ván nhỏ nhé! Luật dành cho bạn mới: ai ăn được quân trước sẽ thắng.',
+      b:[[2,2],[3,3]], w:[[3,2],[2,3]]},
+    {type:'talk', size:7, text:'Bé cầm quân đen và đi trước. Nhớ để ý hơi thở của quân mình, và tìm quân trắng nào chỉ còn 1 hơi thở nhé!',
+      b:[[2,2],[3,3]], w:[[3,2],[2,3]]},
+    {type:'game', size:7, b:[[2,2],[3,3]], w:[[3,2],[2,3]],
+      text:'Đến lượt bé! Đặt quân đen vào giao điểm bất kỳ.',
+      done:'Bé thắng rồi! Bé đã ăn được quân của Thầy Rùa!'},
+  ]},
+];
+
+/* ================= Go engine ================= */
+const pid = (n,p) => p[1]*n + p[0];
+function makeBoard(n, b=[], w=[]){
+  const g = new Array(n*n).fill(0);
+  b.forEach(p => g[pid(n,p)] = 1);
+  w.forEach(p => g[pid(n,p)] = 2);
+  return {n, g};
+}
+const cloneB = B => ({n:B.n, g:B.g.slice()});
+function nbrs(n,i){
+  const x = i % n, y = (i - x) / n, r = [];
+  if (x > 0) r.push(i-1); if (x < n-1) r.push(i+1);
+  if (y > 0) r.push(i-n); if (y < n-1) r.push(i+n);
+  return r;
+}
+function groupAt(B,i){
+  const c = B.g[i], seen = new Set([i]), st = [i], libs = new Set();
+  while (st.length){
+    const j = st.pop();
+    for (const k of nbrs(B.n,j)){
+      if (B.g[k] === 0) libs.add(k);
+      else if (B.g[k] === c && !seen.has(k)){ seen.add(k); st.push(k); }
+    }
+  }
+  return {stones:[...seen], libs};
+}
+function play(B,i,c){
+  if (B.g[i] !== 0) return {ok:false, reason:'occupied'};
+  const T = cloneB(B); T.g[i] = c;
+  const cap = [];
+  for (const k of nbrs(T.n,i)){
+    if (T.g[k] === 3-c){
+      const gr = groupAt(T,k);
+      if (gr.libs.size === 0){ gr.stones.forEach(s => T.g[s] = 0); cap.push(...gr.stones); }
+    }
+  }
+  if (groupAt(T,i).libs.size === 0) return {ok:false, reason:'suicide'};
+  return {ok:true, board:T, captured:cap};
+}
+function territory(B){
+  const n = B.n, res = new Array(n*n).fill(0), seen = new Set();
+  for (let i = 0; i < n*n; i++){
+    if (B.g[i] !== 0 || seen.has(i)) continue;
+    const region = [i], st = [i], border = new Set(); seen.add(i);
+    while (st.length){
+      const j = st.pop();
+      for (const k of nbrs(n,j)){
+        if (B.g[k] === 0){ if (!seen.has(k)){ seen.add(k); st.push(k); region.push(k); } }
+        else border.add(B.g[k]);
+      }
+    }
+    if (border.size === 1){ const o = [...border][0]; region.forEach(j => res[j] = o); }
+  }
+  return res;
+}
+function groupsInAtari(B,c){
+  const seen = new Set(), out = [];
+  for (let i = 0; i < B.g.length; i++){
+    if (B.g[i] !== c || seen.has(i)) continue;
+    const gr = groupAt(B,i); gr.stones.forEach(s => seen.add(s));
+    if (gr.libs.size === 1) out.push(gr);
+  }
+  return out;
+}
+/* Friendly opponent for the capture game: takes captures, often escapes, otherwise plays near the action. */
+function aiMove(B){
+  const n = B.n, legal = [];
+  for (let i = 0; i < n*n; i++){ if (B.g[i] === 0){ const r = play(B,i,2); if (r.ok) legal.push([i,r]); } }
+  if (!legal.length) return -1;
+  const cap = legal.find(([,r]) => r.captured.length);
+  if (cap) return cap[0];
+  for (const gr of groupsInAtari(B,2)){
+    const l = [...gr.libs][0], r = play(B,l,2);
+    if (r.ok && groupAt(r.board,l).libs.size >= 2 && Math.random() < 0.7) return l;
+  }
+  let best = -1, bestS = -1e9;
+  for (const [i,r] of legal){
+    const mine = groupAt(r.board,i).libs.size;
+    let s = mine * 0.6 + Math.random() * 3;
+    if (mine === 1) s -= 20;
+    for (const k of nbrs(n,i)){
+      if (r.board.g[k] === 1){
+        const L = groupAt(r.board,k).libs.size;
+        if (L === 1 && mine >= 2) s += 4; else if (L === 2) s += 1.5;
+      }
+      if (B.g[k] !== 0) s += 0.8;
+    }
+    if (s > bestS){ bestS = s; best = i; }
+  }
+  return best;
+}
+
+/* ================= Voice & sound ================= */
+const V = { on:true, voice:null, ok:'speechSynthesis' in window };
+function pickVoice(){
+  if (!V.ok) return;
+  const vs = speechSynthesis.getVoices();
+  V.voice = vs.find(v => /^vi/i.test(v.lang) && /google/i.test(v.name)) || vs.find(v => /^vi/i.test(v.lang)) || null;
+  const note = document.getElementById('voiceNote');
+  if (vs.length && !V.voice){ note.hidden = false; note.textContent = 'Máy này chưa có giọng đọc tiếng Việt, Thầy Rùa có thể đọc chưa chuẩn. Bé nên dùng trình duyệt Chrome hoặc Edge nhé.'; }
+  else note.hidden = true;
+}
+if (V.ok){ pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+else { const note = document.getElementById('voiceNote'); note.hidden = false; note.textContent = 'Trình duyệt này không hỗ trợ giọng đọc. Bé vẫn có thể đọc chữ trong bong bóng nhé.'; }
+let speakTimer = 0;
+function speak(text){
+  if (!V.ok || !V.on || !text) return;
+  speechSynthesis.cancel();
+  clearTimeout(speakTimer);
+  speakTimer = setTimeout(() => {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'vi-VN'; if (V.voice) u.voice = V.voice;
+    u.rate = 0.92; u.pitch = 1.15;
+    u.onstart = () => setTalking(true);
+    u.onend = u.onerror = () => setTalking(false);
+    speechSynthesis.speak(u);
+  }, 80);
+}
+function setTalking(on){ document.querySelectorAll('.turtle').forEach(t => t.classList.toggle('talking', on)); }
+
+let AC = null;
+function ac(){ try{ if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === 'suspended') AC.resume(); }catch(e){ AC = null; } return AC; }
+function tone(f, t0, dur, type='sine', vol=.18){
+  const a = ac(); if (!a) return;
+  const t = a.currentTime + t0, o = a.createOscillator(), g = a.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t+0.012); g.gain.exponentialRampToValueAtTime(0.0001, t+dur);
+  o.connect(g).connect(a.destination); o.start(t); o.stop(t+dur+0.05);
+}
+const sfx = {
+  stone(){
+    const a = ac(); if (!a) return;
+    const len = a.sampleRate * 0.06, buf = a.createBuffer(1, len, a.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/len, 4);
+    const s = a.createBufferSource(), f = a.createBiquadFilter(), g = a.createGain();
+    f.type = 'bandpass'; f.frequency.value = 1800; f.Q.value = 1.2; g.gain.value = 0.9;
+    s.buffer = buf; s.connect(f).connect(g).connect(a.destination); s.start();
+    tone(170, 0, .08, 'sine', .25);
+  },
+  pop(){ tone(620,0,.1,'sine',.16); tone(930,.05,.12,'sine',.12); },
+  good(){ [523,659,784,1046].forEach((f,i) => tone(f, i*.09, .28, 'triangle', .16)); },
+  oops(){ tone(330,0,.16,'square',.05); tone(247,.14,.26,'square',.05); },
+  capture(){ [880,660,990].forEach((f,i) => tone(f, i*.06, .16, 'triangle', .14)); },
+  fanfare(){ [523,659,784,659,784,1046].forEach((f,i) => tone(f, i*.12, .32, 'triangle', .16)); },
+};
+
+/* ================= Graphics ================= */
+function turtleSVG(){
+  return `<svg class="turtle" viewBox="0 0 140 118" aria-hidden="true">
+    <ellipse cx="66" cy="110" rx="54" ry="7" fill="rgba(8,60,95,.25)"/>
+    <g class="body">
+      <ellipse cx="36" cy="96" rx="13" ry="10" fill="#6cc35a"/>
+      <ellipse cx="90" cy="96" rx="13" ry="10" fill="#6cc35a"/>
+      <path d="M20 84 q-11 1 -9 -8" stroke="#6cc35a" stroke-width="7" fill="none" stroke-linecap="round"/>
+      <path d="M96 74 Q104 60 108 56" stroke="#7fd36b" stroke-width="16" fill="none" stroke-linecap="round"/>
+      <circle cx="114" cy="50" r="22" fill="#86da72"/>
+      <g class="eyes">
+        <circle cx="107" cy="45" r="6.5" fill="#fff"/><circle cx="121" cy="45" r="6.5" fill="#fff"/>
+        <circle cx="108.5" cy="46" r="3.6" fill="#1d2b44"/><circle cx="122.5" cy="46" r="3.6" fill="#1d2b44"/>
+        <circle cx="109.6" cy="44.6" r="1.2" fill="#fff"/><circle cx="123.6" cy="44.6" r="1.2" fill="#fff"/>
+      </g>
+      <circle cx="101" cy="56" r="4" fill="#ff8f7d" opacity=".75"/><circle cx="128" cy="56" r="4" fill="#ff8f7d" opacity=".75"/>
+      <path class="mouth-smile" d="M108 57 q6 6 12 0" stroke="#1d2b44" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+      <ellipse class="mouth-open" cx="114" cy="59" rx="5" ry="4.5" fill="#7a2e2e"/>
+      <path d="M16 88 Q18 26 64 26 Q110 26 108 88 Z" fill="#3a8a4c"/>
+      <path d="M24 86 Q28 38 64 36 Q100 38 100 86 Z" fill="url(#gWood)"/>
+      <g clip-path="url(#shellClip)" stroke="#5b3a17" stroke-width="1.6" opacity=".75">
+        <path d="M40 30v60M52 30v60M64 30v60M76 30v60M88 30v60M20 50h90M20 62h90M20 74h90"/>
+      </g>
+      <circle cx="52" cy="62" r="5.4" fill="url(#gB)"/>
+      <circle cx="76" cy="50" r="5.4" fill="url(#gW)"/>
+      <circle cx="76" cy="74" r="5.4" fill="url(#gB)"/>
+      <path d="M12 88 H112" stroke="#2c6d3b" stroke-width="8" stroke-linecap="round"/>
+    </g>
+  </svg>`;
+}
+const starSVG = on => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.6l2.9 6 6.5.8-4.8 4.5 1.2 6.5L12 17.2l-5.8 3.2 1.2-6.5L2.6 9.4l6.5-.8z" fill="${on ? '#ffc83a' : 'rgba(255,255,255,.35)'}" stroke="${on ? '#c9860c' : 'rgba(29,43,68,.25)'}" stroke-width="1.4" stroke-linejoin="round"/></svg>`;
+const lockSVG = `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2.5" fill="#fff"/><path d="M8 10V7.5a4 4 0 0 1 8 0V10" stroke="#fff" stroke-width="2.6" fill="none"/></svg>`;
+const flagSVG = `<svg class="flag" viewBox="0 0 40 48" aria-hidden="true"><path d="M8 4v42" stroke="#5b3a17" stroke-width="3.5" stroke-linecap="round"/><path d="M10 6h24l-6 8 6 8H10z" fill="#ff6f59"/></svg>`;
+
+/* ================= State & storage ================= */
+const KEY = 'dao-co-vay-v1';
+let SAVE = { stars:{} };
+try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.stars) SAVE = s; } catch(e){}
+function persist(){ try { localStorage.setItem(KEY, JSON.stringify(SAVE)); } catch(e){} }
+const starsOf = i => SAVE.stars[i] || 0;
+const unlocked = i => i === 0 || starsOf(i-1) > 0;
+
+const S = { li:0, si:0, step:null, board:null, base:null, targets:[], found:new Set(), hints:[], bubbles:[],
+  xmark:-1, drop:-1, poof:[], last:-1, placed:0, rounds:0, mistakes:0, done:false, locked:false, over:false };
+
+const $ = s => document.querySelector(s);
+
+/* ================= Map ================= */
+const OFFS = [0.1, 0.55, 0.9, 0.5, 0.08, 0.45, 0.88, 0.5];
+function renderMap(){
+  const total = LESSONS.reduce((a,_,i) => a + starsOf(i), 0);
+  $('#starTotal').innerHTML = `${starSVG(true)} ${total}/${LESSONS.length*3}`;
+  const next = LESSONS.findIndex((_,i) => !starsOf(i));
+  const nx = next < 0 ? 0 : next;
+  $('#playNext').innerHTML = next < 0 ? 'Chơi lại từ đầu' : (total ? `Chơi tiếp: Đảo ${nx+1}` : 'Bắt đầu học');
+  $('#playNext').onclick = () => openLesson(nx);
+  $('#isles').innerHTML = LESSONS.map((L,i) => {
+    const ok = unlocked(i), st = starsOf(i), cur = i === next;
+    return `<div class="isle" style="--off:${OFFS[i % OFFS.length]}">
+      <button class="isle-btn ${st ? 'done' : ''}" data-i="${i}" ${ok ? '' : 'disabled'} aria-label="Đảo ${i+1}: ${L.title}${ok ? '' : ' (chưa mở)'}">
+        <span class="stone">${ok ? i+1 : lockSVG}</span>${cur ? flagSVG : ''}
+      </button>
+      <h3>${L.title}</h3>
+      <div class="sub">${L.sub}</div>
+      <div class="stars">${[0,1,2].map(k => starSVG(k < st)).join('')}</div>
+    </div>`;
+  }).join('');
+  requestAnimationFrame(drawPath);
+}
+function drawPath(){
+  const box = $('#map'), svg = $('#mapPath');
+  if (box.offsetParent === null) return;
+  const r = box.getBoundingClientRect();
+  const pts = [...box.querySelectorAll('.isle-btn')].map(el => {
+    const b = el.getBoundingClientRect(); return [b.left + b.width/2 - r.left, b.top + b.height/2 - r.top];
+  });
+  if (pts.length < 2) return;
+  let d = `M${pts[0][0]} ${pts[0][1]}`;
+  for (let i = 1; i < pts.length; i++){
+    const [x0,y0] = pts[i-1], [x1,y1] = pts[i], dy = (y1 - y0) / 2;
+    d += ` C${x0} ${y0+dy} ${x1} ${y1-dy} ${x1} ${y1}`;
+  }
+  svg.setAttribute('viewBox', `0 0 ${r.width} ${r.height}`);
+  svg.setAttribute('width', r.width); svg.setAttribute('height', r.height);
+  svg.innerHTML = `<path d="${d}" stroke="rgba(255,227,161,.55)" stroke-width="22" fill="none" stroke-linecap="round"/>
+    <path d="${d}" stroke="#fff" stroke-width="4" stroke-dasharray="2 14" fill="none" stroke-linecap="round"/>`;
+}
+$('#isles').addEventListener('click', e => {
+  const b = e.target.closest('.isle-btn'); if (b && !b.disabled) openLesson(+b.dataset.i);
+});
+window.addEventListener('resize', () => requestAnimationFrame(drawPath));
+$('#hello').onclick = () => {
+  ac();
+  speak('Chào bé! Mình là Thầy Rùa. Mỗi hòn đảo là một bài học nhỏ. Bé chạm vào hòn đảo có lá cờ đỏ để bắt đầu nhé!');
+};
+
+/* ================= Voice toggle ================= */
+function renderVoiceBtn(){
+  const b = $('#voiceBtn');
+  b.setAttribute('aria-pressed', V.on);
+  b.innerHTML = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/>${V.on
+    ? '<path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>'
+    : '<path d="M16 9l5 6M21 9l-5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>'}</svg> Giọng nói: ${V.on ? 'Bật' : 'Tắt'}`;
+}
+$('#voiceBtn').onclick = () => {
+  V.on = !V.on;
+  try { localStorage.setItem(KEY + '-voice', V.on ? '1' : '0'); } catch(e){}
+  if (!V.on && V.ok){ speechSynthesis.cancel(); setTalking(false); }
+  renderVoiceBtn();
+};
+try { if (localStorage.getItem(KEY + '-voice') === '0') V.on = false; } catch(e){}
+
+/* ================= Lesson flow ================= */
+function show(screen){
+  $('#mapScreen').hidden = screen !== 'map';
+  $('#lessonScreen').hidden = screen !== 'lesson';
+  window.scrollTo(0,0);
+  if (screen === 'map'){ renderMap(); if (V.ok) speechSynthesis.cancel(); setTalking(false); }
+}
+function openLesson(i){
+  ac();
+  S.li = i; S.si = 0; S.mistakes = 0;
+  $('#lessonTitle').innerHTML = `<small>Đảo ${i+1}</small>${LESSONS[i].title}`;
+  show('lesson');
+  startStep();
+}
+function startStep(){
+  const L = LESSONS[S.li], st = L.steps[S.si];
+  const n = st.size || 5;
+  S.step = st; S.board = makeBoard(n, st.b, st.w); S.base = cloneB(S.board);
+  S.hints = (st.hints || []).map(p => pid(n,p));
+  S.bubbles = st.showLibs ? [...groupAt(S.board, pid(n, st.showLibs)).libs] : [];
+  S.targets = st.libsOf ? [...groupAt(S.board, pid(n, st.libsOf)).libs] : (st.targets || []).map(p => pid(n,p));
+  if (st.type === 'targets' && st.hint) S.hints = [...S.targets];
+  S.found = new Set(); S.placed = 0; S.rounds = 0; S.last = -1; S.xmark = -1; S.poof = []; S.drop = -1;
+  S.done = false; S.locked = false; S.over = false; S.showTerr = !!st.terr;
+  $('#dots').innerHTML = L.steps.map((_,k) => `<i class="${k < S.si ? 'on' : k === S.si ? 'now' : ''}"></i>`).join('');
+  say(st.text);
+  renderCtrl();
+  renderTurn();
+  renderBoard();
+}
+function say(text, mood){
+  const box = $('#say');
+  box.className = 'say' + (mood ? ' ' + mood : '');
+  $('#sayText').textContent = text;
+  $('#sayText').classList.remove('fresh'); void $('#sayText').offsetWidth; $('#sayText').classList.add('fresh');
+  const t = $('#coachTurtle .turtle');
+  if (t){ t.classList.remove('happy','sad'); void t.offsetWidth; if (mood === 'good') t.classList.add('happy'); if (mood === 'oops') t.classList.add('sad'); }
+  speak(text);
+}
+const ICON_EAR = '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
+const ICON_GO = '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke="currentColor" stroke-width="3.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICON_BULB = '<svg viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0-3.5 10.9V16h7v-2.1A6 6 0 0 0 12 3z" fill="currentColor"/><path d="M9.5 19h5M10.5 21.5h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+function renderCtrl(){
+  const st = S.step, c = $('#ctrl');
+  let h = `<button class="gbtn alt" data-a="again">${ICON_EAR}Nghe lại</button>`;
+  if (st.type === 'quiz' && !S.done){
+    h = `<div class="quiz">${st.options.map((o,k) => `<button class="gbtn" data-a="opt" data-k="${k}">${o.label}</button>`).join('')}</div>` + h;
+  }
+  if (st.type === 'game' && S.over && !S.done) h += `<button class="gbtn red pulse" data-a="retry">Chơi lại ván mới</button>`;
+  if (!S.done && ['move','targets'].includes(st.type) && !(st.type === 'targets' && st.hint))
+    h += `<button class="gbtn alt" data-a="hint">${ICON_BULB}Gợi ý</button>`;
+  if (st.type === 'talk' || S.done){
+    const last = S.si === LESSONS[S.li].steps.length - 1;
+    h += `<button class="gbtn go pulse" data-a="next">${last ? 'Hoàn thành' : 'Tiếp tục'}${ICON_GO}</button>`;
+  }
+  c.innerHTML = h;
+}
+$('#ctrl').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  ac();
+  const a = b.dataset.a, st = S.step;
+  if (a === 'again') speak($('#sayText').textContent);
+  if (a === 'next') nextStep();
+  if (a === 'hint'){ S.hints = hintFor(); renderBoard(); say('Bé nhìn chỗ đang nhấp nháy nhé!'); }
+  if (a === 'retry') startStep();
+  if (a === 'opt'){
+    const o = st.options[+b.dataset.k];
+    if (o.ok) success(st.done); else fail(st.fail);
+  }
+});
+$('#backBtn').onclick = () => show('map');
+
+function hintFor(){
+  const st = S.step, B = S.board, n = B.n;
+  if (st.type === 'targets') return S.targets.filter(t => !S.found.has(t));
+  if (st.goal === 'point') return st.points.map(p => pid(n,p));
+  if (st.goal === 'escape') return [...groupAt(B, pid(n, st.save)).libs];
+  if (st.goal === 'capture') return groupsInAtari(B,2).flatMap(g => [...g.libs]);
+  return [];
+}
+function success(msg){
+  S.done = true; S.hints = [];
+  if (S.step.terrAfter) S.showTerr = true;
+  sfx.good(); say(msg, 'good'); renderCtrl(); renderTurn(); renderBoard();
+}
+function fail(msg, countIt = true){
+  if (countIt) S.mistakes++;
+  sfx.oops(); say(msg, 'oops');
+  const b = $('#board'); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake');
+}
+function nextStep(){
+  if (S.si < LESSONS[S.li].steps.length - 1){ S.si++; startStep(); }
+  else finishLesson();
+}
+
+/* ================= Board ================= */
+const STEP = 50, MARGIN = 38;
+const xy = (n,i) => { const x = i % n, y = (i - x) / n; return [MARGIN + x*STEP, MARGIN + y*STEP]; };
+function renderBoard(){
+  const B = S.board, n = B.n, size = MARGIN*2 + STEP*(n-1), R = STEP*0.46;
+  let s = `<svg viewBox="0 0 ${size} ${size}" role="img" aria-label="Bàn cờ ${n} nhân ${n}">`;
+  s += `<rect x="2" y="8" width="${size-4}" height="${size-8}" rx="20" fill="#a46a28"/>`;
+  s += `<rect x="2" y="2" width="${size-4}" height="${size-8}" rx="20" fill="url(#gWood)"/>`;
+  for (let k = 0; k < 5; k++){
+    const y = 30 + k * (size/5);
+    s += `<path d="M10 ${y} q${size/4} -10 ${size/2} 0 t${size/2 - 20} 0" stroke="#c98e3c" stroke-width="2" fill="none" opacity=".35"/>`;
+  }
+  const a = MARGIN, z = MARGIN + STEP*(n-1);
+  for (let k = 0; k < n; k++){
+    const p = MARGIN + k*STEP, w = (k === 0 || k === n-1) ? 3 : 2;
+    s += `<line x1="${a}" y1="${p}" x2="${z}" y2="${p}" stroke="#5b3a17" stroke-width="${w}" stroke-linecap="round"/>`;
+    s += `<line x1="${p}" y1="${a}" x2="${p}" y2="${z}" stroke="#5b3a17" stroke-width="${w}" stroke-linecap="round"/>`;
+  }
+  const stars = n === 7 ? [[3,3]] : n === 5 ? [[2,2]] : [];
+  stars.forEach(p => { const [cx,cy] = xy(n, pid(n,p)); s += `<circle cx="${cx}" cy="${cy}" r="4.5" fill="#5b3a17"/>`; });
+  if (S.showTerr){
+    const T = territory(B);
+    T.forEach((o,i) => { if (!o) return; const [cx,cy] = xy(n,i);
+      s += `<rect x="${cx-9}" y="${cy-9}" width="18" height="18" rx="4" fill="url(#${o === 1 ? 'gB' : 'gW'})" stroke="${o === 1 ? '#000' : '#8a94a3'}" stroke-width="1.2"/>`; });
+  }
+  S.bubbles.forEach(i => { const [cx,cy] = xy(n,i);
+    s += `<g class="bub"><circle cx="${cx}" cy="${cy}" r="${R*0.62}" fill="url(#gBub)" stroke="#2a8fd0" stroke-width="2"/><circle cx="${cx-5}" cy="${cy-6}" r="3.5" fill="#fff"/></g>`; });
+  B.g.forEach((c,i) => { if (!c) return; const [cx,cy] = xy(n,i);
+    s += `<g class="${i === S.drop ? 'drop' : ''}"><circle cx="${cx+1.5}" cy="${cy+3}" r="${R}" fill="rgba(60,30,0,.3)"/><circle cx="${cx}" cy="${cy}" r="${R}" fill="url(#${c === 1 ? 'gB' : 'gW'})"/></g>`; });
+  S.poof.forEach(([i,c]) => { const [cx,cy] = xy(n,i);
+    s += `<circle class="poof" cx="${cx}" cy="${cy}" r="${R}" fill="url(#${c === 1 ? 'gB' : 'gW'})"/>`; });
+  if (S.last >= 0 && B.g[S.last]){ const [cx,cy] = xy(n,S.last);
+    s += `<circle cx="${cx}" cy="${cy}" r="6" fill="none" stroke="${B.g[S.last] === 1 ? '#fff' : '#1d2b44'}" stroke-width="2.5"/>`; }
+  S.hints.forEach(i => { const [cx,cy] = xy(n,i);
+    s += `<circle class="hint" cx="${cx}" cy="${cy}" r="${R*0.8}" fill="rgba(255,200,58,.45)" stroke="#ff6f59" stroke-width="4"/>`; });
+  if (S.xmark >= 0){ const [cx,cy] = xy(n,S.xmark), d = 11;
+    s += `<path class="drop" d="M${cx-d} ${cy-d}L${cx+d} ${cy+d}M${cx+d} ${cy-d}L${cx-d} ${cy+d}" stroke="#ff6f59" stroke-width="7" stroke-linecap="round"/>`; }
+  s += `<circle id="ghost" r="${R}" cx="-100" cy="-100" fill="#111" opacity=".28" pointer-events="none"/></svg>`;
+  $('#board').innerHTML = s;
+  S.drop = -1; S.poof = [];
+}
+function pointFromEvent(e){
+  const svg = $('#board svg'); if (!svg) return -1;
+  const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+  const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+  const n = S.board.n, x = Math.round((p.x - MARGIN) / STEP), y = Math.round((p.y - MARGIN) / STEP);
+  if (x < 0 || y < 0 || x >= n || y >= n) return -1;
+  const [cx,cy] = xy(n, y*n + x);
+  if (Math.hypot(p.x - cx, p.y - cy) > STEP*0.55) return -1;
+  return y*n + x;
+}
+const placing = () => {
+  const t = S.step && S.step.type;
+  return !S.done && !S.locked && !S.over && (t === 'free' || t === 'alternate' || t === 'move' || t === 'game' || t === 'targets');
+};
+$('#board').addEventListener('pointermove', e => {
+  const g = $('#ghost'); if (!g) return;
+  const i = e.pointerType === 'mouse' && placing() ? pointFromEvent(e) : -1;
+  if (i < 0 || S.board.g[i] || S.found.has(i)){ g.setAttribute('cx', -100); return; }
+  const [cx,cy] = xy(S.board.n, i); g.setAttribute('cx', cx); g.setAttribute('cy', cy);
+  g.setAttribute('fill', S.step.marker === 'bubble' ? '#55b8ec' : '#111');
+});
+$('#board').addEventListener('pointerleave', () => { const g = $('#ghost'); if (g) g.setAttribute('cx', -100); });
+$('#board').addEventListener('click', e => {
+  ac();
+  const i = pointFromEvent(e);
+  if (i < 0) return;
+  onTap(i);
+});
+
+function flashX(i){ S.xmark = i; renderBoard(); setTimeout(() => { if (S.xmark === i){ S.xmark = -1; renderBoard(); } }, 800); }
+function illegalMsg(reason){
+  return reason === 'occupied' ? 'Chỗ này đã có quân rồi. Bé chọn giao điểm còn trống nhé.'
+    : 'Đặt ở đây quân đen sẽ hết hơi thở ngay. Không được đặt đâu bé!';
+}
+function applyMove(r, i, color){
+  S.board = r.board; S.last = i; S.drop = i;
+  S.poof = r.captured.map(k => [k, 3 - color]);
+  if (r.captured.length) sfx.capture(); else sfx.stone();
+}
+
+function onTap(i){
+  const st = S.step, B = S.board;
+  if (st.type === 'talk'){
+    say('Bé bấm nút Tiếp tục màu xanh để đi tiếp nhé!');
+    return;
+  }
+  if (!placing()) return;
+  switch (st.type){
+    case 'targets': {
+      if (S.found.has(i)) return;
+      if (S.targets.includes(i)){
+        S.found.add(i); S.hints = S.hints.filter(h => h !== i);
+        if (st.marker === 'stone'){ B.g[i] = 1; S.drop = i; sfx.stone(); } else { S.bubbles.push(i); sfx.pop(); }
+        renderBoard();
+        if (S.found.size === S.targets.length) success(st.done);
+        else if (st.marker === 'bubble') $('#sayText').textContent = `${st.text} (Đã tìm được ${S.found.size})`;
+      } else if (B.g[i]){
+        fail(st.marker === 'bubble' ? 'Đó là quân cờ, không phải hơi thở. Hơi thở là chỗ còn trống nhé.' : illegalMsg('occupied'), false);
+      } else {
+        fail(st.wrong, !st.soft); flashX(i);
+      }
+      break;
+    }
+    case 'free': {
+      if (B.g[i]){ fail(illegalMsg('occupied'), false); return; }
+      B.g[i] = 1; S.drop = i; S.last = i; S.placed++; sfx.stone(); renderBoard();
+      if (S.placed >= st.count) success(st.done);
+      else $('#sayText').textContent = `${st.text} (Còn ${st.count - S.placed} quân)`;
+      break;
+    }
+    case 'alternate': {
+      const r = play(B, i, 1);
+      if (!r.ok){ fail(illegalMsg(r.reason), false); return; }
+      applyMove(r, i, 1); S.rounds++; renderBoard();
+      if (S.rounds >= st.rounds){ success(st.done); return; }
+      S.locked = true; renderTurn();
+      setTimeout(() => {
+        const empt = []; S.board.g.forEach((c,k) => { if (!c && play(S.board,k,2).ok) empt.push(k); });
+        const k = empt[Math.floor(Math.random() * empt.length)];
+        applyMove(play(S.board,k,2), k, 2); S.locked = false; renderTurn(); renderBoard();
+        $('#sayText').textContent = `Thầy Rùa đã đặt quân trắng. Đến lượt bé! (Còn ${st.rounds - S.rounds} lượt)`;
+      }, 750);
+      break;
+    }
+    case 'move': {
+      const r = play(B, i, 1);
+      if (!r.ok){ fail(illegalMsg(r.reason), false); return; }
+      applyMove(r, i, 1); renderBoard();
+      let good = false;
+      if (st.goal === 'capture') good = r.captured.length > 0;
+      if (st.goal === 'escape') good = groupAt(S.board, pid(B.n, st.save)).libs.size >= 2;
+      if (st.goal === 'point') good = st.points.some(p => pid(B.n,p) === i);
+      if (good) success(st.done);
+      else {
+        fail(st.fail); S.locked = true;
+        setTimeout(() => { S.board = cloneB(S.base); S.last = -1; S.locked = false; renderBoard(); }, 1300);
+      }
+      break;
+    }
+    case 'game': gameTap(i); break;
+  }
+}
+
+/* ================= Capture game ================= */
+function renderTurn(){
+  const c = $('#turnChip'), st = S.step;
+  if (!st || !['game','alternate'].includes(st.type) || S.done || S.over){ c.hidden = true; return; }
+  c.hidden = false;
+  c.className = 'turnchip' + (S.locked ? ' white' : '');
+  c.innerHTML = S.locked ? '<b></b> Thầy Rùa đang nghĩ...' : '<b></b> Lượt của bé';
+}
+function gameTap(i){
+  const r = play(S.board, i, 1);
+  if (!r.ok){ fail(illegalMsg(r.reason), false); return; }
+  applyMove(r, i, 1); renderBoard();
+  if (r.captured.length){ success(S.step.done); return; }
+  S.locked = true; renderTurn();
+  setTimeout(() => {
+    const k = aiMove(S.board);
+    if (k < 0){ S.locked = false; S.over = true; say('Bàn cờ hết chỗ rồi. Chơi lại ván mới nhé!'); renderCtrl(); renderTurn(); return; }
+    const rr = play(S.board, k, 2);
+    applyMove(rr, k, 2); S.locked = false; renderBoard();
+    if (rr.captured.length){
+      S.over = true; S.mistakes++;
+      fail('Ôi, Thầy Rùa ăn được quân đen rồi! Không sao đâu, mình chơi lại ván mới nhé.', false);
+      renderCtrl(); renderTurn(); return;
+    }
+    renderTurn();
+    const wA = groupsInAtari(S.board, 2), bA = groupsInAtari(S.board, 1);
+    if (wA.length) say('Có quân trắng chỉ còn 1 hơi thở. Bé ăn được không?');
+    else if (bA.length) say('Cẩn thận! Quân đen của bé chỉ còn 1 hơi thở. Bé chạy thoát đi!');
+    else $('#sayText').textContent = 'Đến lượt bé! Tìm quân trắng nào có ít hơi thở nhất nhé.';
+  }, 800);
+}
+
+/* ================= Finish ================= */
+function finishLesson(){
+  const stars = S.mistakes === 0 ? 3 : S.mistakes <= 2 ? 2 : 1;
+  SAVE.stars[S.li] = Math.max(starsOf(S.li), stars); persist();
+  const hasNext = S.li < LESSONS.length - 1;
+  const praise = stars === 3 ? 'Xuất sắc!' : stars === 2 ? 'Giỏi lắm!' : 'Bé đã cố gắng!';
+  const box = $('#winBox');
+  box.innerHTML = `<div class="card-win" role="dialog" aria-modal="true" aria-labelledby="winT">
+    ${turtleSVG()}
+    <h2 id="winT">${praise}</h2>
+    <div class="stars">${[0,1,2].map(k => starSVG(k < stars)).join('')}</div>
+    <p>Bé đã hoàn thành đảo ${S.li+1}: ${LESSONS[S.li].title}.${hasNext ? ' Đảo tiếp theo đã mở!' : ' Bé đã đi hết các hòn đảo rồi!'}</p>
+    <div class="row">
+      <button class="gbtn alt" id="wMap">Về bản đồ</button>
+      ${hasNext ? `<button class="gbtn go pulse" id="wNext">Đảo tiếp theo${ICON_GO}</button>` : `<button class="gbtn go" id="wAgain">Chơi lại ván cờ</button>`}
+    </div></div>`;
+  box.hidden = false;
+  sfx.fanfare(); confetti();
+  speak(`${praise} Bé nhận được ${stars} ngôi sao. ${hasNext ? 'Đảo tiếp theo đã mở rồi!' : 'Bé đã trở thành kỳ thủ nhí của Đảo Cờ Vây!'}`);
+  const close = () => { box.hidden = true; };
+  $('#wMap').onclick = () => { close(); show('map'); };
+  if (hasNext) $('#wNext').onclick = () => { close(); openLesson(S.li + 1); };
+  else $('#wAgain').onclick = () => { close(); openLesson(S.li); };
+  $('#wMap').focus();
+}
+function confetti(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const c = $('#confetti'), x = c.getContext('2d');
+  c.hidden = false; c.width = innerWidth; c.height = innerHeight;
+  const cols = ['#ffc83a','#ff6f59','#39b864','#2fa4d9','#ffffff','#1d2b44'];
+  const P = Array.from({length:140}, () => ({ x:Math.random()*c.width, y:-20 - Math.random()*c.height*0.5,
+    vx:(Math.random()-.5)*3, vy:2 + Math.random()*3, r:4 + Math.random()*5, c:cols[Math.floor(Math.random()*cols.length)], round:Math.random() < .5, a:Math.random()*6 }));
+  const t0 = performance.now();
+  (function f(t){
+    x.clearRect(0,0,c.width,c.height);
+    P.forEach(p => { p.x += p.vx; p.y += p.vy; p.a += .1; x.fillStyle = p.c;
+      if (p.round){ x.beginPath(); x.arc(p.x,p.y,p.r,0,7); x.fill(); }
+      else { x.save(); x.translate(p.x,p.y); x.rotate(p.a); x.fillRect(-p.r,-p.r/2,p.r*2,p.r); x.restore(); } });
+    if (t - t0 < 3200) requestAnimationFrame(f); else { x.clearRect(0,0,c.width,c.height); c.hidden = true; }
+  })(t0);
+}
+
+/* ================= Boot ================= */
+$('#heroTurtle').innerHTML = turtleSVG();
+$('#coachTurtle').innerHTML = turtleSVG();
+renderVoiceBtn();
+show('map');
+</script>
