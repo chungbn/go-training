@@ -523,7 +523,10 @@ const V = { on:true, voice:null, ok:'speechSynthesis' in window };
 function pickVoice(){
   if (!V.ok) return;
   const vs = speechSynthesis.getVoices();
-  V.voice = vs.find(v => /^vi/i.test(v.lang) && /google/i.test(v.name)) || vs.find(v => /^vi/i.test(v.lang)) || null;
+  // Warm, deep voices first: Edge's natural male NamMinh, other natural voices, then any Vietnamese voice
+  const vi = vs.filter(v => /^vi/i.test(v.lang));
+  V.voice = vi.find(v => /namminh/i.test(v.name)) || vi.find(v => /natural/i.test(v.name))
+    || vi.find(v => /\ban\b/i.test(v.name)) || vi.find(v => /google/i.test(v.name)) || vi[0] || null;
   const note = document.getElementById('voiceNote');
   if (vs.length && !V.voice){ note.hidden = false; note.textContent = 'Máy này chưa có giọng đọc tiếng Việt, Thầy Rùa có thể đọc chưa chuẩn. Bé nên dùng trình duyệt Chrome hoặc Edge nhé.'; }
   else note.hidden = true;
@@ -538,7 +541,7 @@ function speak(text){
   speakTimer = setTimeout(() => {
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'vi-VN'; if (V.voice) u.voice = V.voice;
-    u.rate = 0.92; u.pitch = 1.15;
+    u.rate = 0.86; u.pitch = 0.8;
     u.onstart = () => setTalking(true);
     u.onend = u.onerror = () => setTalking(false);
     speechSynthesis.speak(u);
