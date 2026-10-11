@@ -400,7 +400,7 @@ h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0; line-height:1.
       </div>
     </div>
     <div class="tabs" role="tablist">
-      <button class="tab" role="tab" id="tabLearn" aria-selected="true">Học bài<small>8 hòn đảo cho bạn mới</small></button>
+      <button class="tab" role="tab" id="tabLearn" aria-selected="true">Học bài<small>13 hòn đảo, từ dễ tới khó</small></button>
       <button class="tab" role="tab" id="tabPlay" aria-selected="false">Thử thách<small>100 ván cờ, khó dần lên</small></button>
       <button class="tab" role="tab" id="tabDuel" aria-selected="false">Đấu cờ<small>Với Thầy Rùa hoặc với bạn</small></button>
     </div>
@@ -563,6 +563,70 @@ const LESSONS = [
     {type:'game', b:[[1,1],[2,2]], w:[[2,1],[1,2]],
       text:'Đến lượt bé! Bé thử đặt quân đen sát một quân trắng xem.',
       done:'Bé thắng rồi! Bé đã ăn được quân của Thầy Rùa!'},
+  ]},
+  { title:'Atari đôi', sub:'Một nước dọa hai quân', steps:[
+    {type:'talk', text:'Bé đã giỏi lắm rồi! Từ đảo này, các bài học sẽ khó hơn một chút. Mình học một chiêu rất hay: Atari đôi.',
+      b:[[1,0],[0,1],[3,0],[4,1]], w:[[1,1],[3,1]]},
+    {type:'talk', text:'Atari đôi là đặt một quân mà làm cho hai quân trắng cùng chỉ còn 1 hơi thở. Thầy Rùa chỉ cứu được một quân, quân còn lại bé sẽ ăn!',
+      b:[[1,0],[0,1],[3,0],[4,1]], w:[[1,1],[3,1]], hints:[[2,1]]},
+    {type:'chase', b:[[1,0],[0,1],[3,0],[4,1]], w:[[1,1],[3,1]],
+      text:'Bé tìm chỗ đặt quân để dọa cả hai quân trắng cùng lúc. Rồi ăn quân mà Thầy Rùa không cứu kịp nhé!',
+      done:'Tuyệt vời! Một nước dọa hai quân, Thầy Rùa không cứu kịp!', fail:'Nước này chưa làm quân trắng nào chỉ còn 1 hơi thở. Bé tìm chỗ nằm giữa hai quân trắng nhé.'},
+    {type:'chase', b:[[0,1],[1,0],[0,3],[1,4]], w:[[1,1],[1,3]],
+      text:'Thêm một lần nữa! Hai quân trắng này đứng thẳng hàng. Bé dọa cả hai rồi ăn một quân nhé.',
+      done:'Bé đúng là cao thủ Atari đôi!', fail:'Chưa đúng. Chỗ tốt nhất nằm sát cả hai quân trắng.'},
+  ]},
+  { title:'Đuổi quân', sub:'Dồn quân ra mép bàn', steps:[
+    {type:'talk', text:'Có khi quân trắng bị Atari sẽ chạy trốn. Bé có thể đuổi theo, dọa nó liên tục cho tới khi nó chạm mép bàn và hết đường chạy.',
+      b:[[1,0],[0,1],[0,2]], w:[[1,1]]},
+    {type:'talk', text:'Bí quyết: đặt quân sao cho quân trắng chạy rồi vẫn chỉ có 2 hơi thở. Nếu nó có tới 3 hơi thở là nó thoát mất đó!',
+      b:[[1,0],[0,1],[0,2]], w:[[1,1]], showLibs:[1,1]},
+    {type:'chase', b:[[1,0],[0,1],[0,2]], w:[[1,1]],
+      text:'Bé đuổi quân trắng nhé! Mỗi nước đều phải làm quân trắng chỉ còn 1 hơi thở. Lúc nào bí, bé bấm Gợi ý.',
+      done:'Đuổi tới mép bàn và ăn cả đoàn quân trắng! Bé giỏi quá!', fail:'Nước này không làm quân trắng chỉ còn 1 hơi thở. Bé dọa nó tiếp nhé.',
+      escaped:'Ôi, quân trắng chạy thoát rồi vì nó có tới 3 hơi thở. Mình đuổi lại từ đầu, lần này chặn phía bên kia nhé!'},
+  ]},
+  { title:'Mắt cờ', sub:'Hai mắt thì sống', steps:[
+    {type:'talk', text:'Chỗ trống nằm hẳn bên trong một nhóm quân gọi là mắt. Quân đối thủ không được đặt vào mắt, vì đặt vào sẽ hết hơi thở ngay.',
+      b:[[0,2],[1,2],[2,2],[3,2],[4,2]], w:[[0,3],[1,3],[2,3],[3,3],[4,3],[1,4],[3,4],[4,4]], hints:[[0,4],[2,4]]},
+    {type:'targets', marker:'bubble', b:[[0,2],[1,2],[2,2],[3,2],[4,2]], w:[[0,3],[1,3],[2,3],[3,3],[4,3],[1,4],[3,4],[4,4]], targets:[[0,4],[2,4]],
+      text:'Bé chạm vào các mắt của nhóm quân trắng nhé.',
+      wrong:'Chưa đúng. Mắt là chỗ trống được quân trắng bao quanh.', done:'Đúng rồi! Nhóm trắng có 2 mắt.'},
+    {type:'quiz', b:[[0,2],[1,2],[2,2],[3,2],[4,2]], w:[[0,3],[1,3],[2,3],[3,3],[4,3],[1,4],[3,4],[4,4]],
+      text:'Nhóm trắng có 2 mắt. Quân đen có ăn được nhóm trắng này không?',
+      options:[{label:'Không ăn được', ok:true},{label:'Ăn được'}],
+      done:'Chính xác! Muốn ăn phải lấp cả 2 mắt, nhưng mắt nào cũng là điểm cấm. Nhóm có 2 mắt sẽ sống mãi mãi!',
+      fail:'Chưa đúng. Bé thử nghĩ xem quân đen có đặt được vào mắt không nhé.'},
+    {type:'move', goal:'capture', b:[[2,0],[2,1],[1,2],[0,2]], w:[[1,0],[0,1],[1,1]],
+      text:'Còn nhóm trắng này chỉ có 1 mắt, và mắt đó là hơi thở cuối cùng. Đặt vào mắt mà ăn được quân thì được phép. Bé ăn đi!',
+      done:'Giỏi quá! Nhóm chỉ có 1 mắt thì vẫn bị ăn.', fail:'Chưa đúng. Bé đặt quân vào mắt của nhóm trắng nhé.'},
+    {type:'move', goal:'point', points:[[1,4],[2,4],[3,4]], terrAfter:true,
+      b:[[0,3],[1,3],[2,3],[3,3],[4,3]], w:[[0,2],[1,2],[2,2],[3,2],[4,2]],
+      text:'Nhóm đen của bé có một khoảng trống dài ở dưới. Bé đặt một quân để chia nó thành 2 mắt nhé!',
+      done:'Tuyệt vời! Nhóm đen đã có 2 mắt, không ai ăn được nữa!', fail:'Chưa được. Bé đặt quân vào giữa khoảng trống để tách ra hai mắt nhé.'},
+  ]},
+  { title:'Luật Ko', sub:'Không ăn qua ăn lại', steps:[
+    {type:'talk', text:'Có một hình rất đặc biệt: bé ăn một quân, nhưng quân vừa đặt cũng chỉ còn 1 hơi thở. Hình này gọi là Ko.',
+      b:[[1,1],[0,2],[1,3]], w:[[2,1],[3,2],[2,3],[1,2]], showLibs:[1,2]},
+    {type:'move', goal:'capture', b:[[1,1],[0,2],[1,3]], w:[[2,1],[3,2],[2,3],[1,2]],
+      text:'Quân trắng ở giữa chỉ còn 1 hơi thở. Bé ăn nó nhé!',
+      done:'Ăn được rồi! Nhưng bé nhìn xem, quân đen vừa đặt cũng chỉ còn 1 hơi thở.', fail:'Chưa đúng. Bé tìm hơi thở cuối cùng của quân trắng ở giữa.'},
+    {type:'quiz', b:[[1,1],[0,2],[1,3],[2,2]], w:[[2,1],[3,2],[2,3]], hints:[[1,2]],
+      text:'Thầy Rùa có được đặt quân trắng vào chỗ nhấp nháy để ăn lại ngay không?',
+      options:[{label:'Được, ăn lại ngay'},{label:'Không, phải đi chỗ khác trước', ok:true}],
+      done:'Đúng rồi! Đó là luật Ko. Nếu không có luật này, hai bên sẽ ăn qua ăn lại mãi không hết.',
+      fail:'Chưa đúng. Nếu được ăn lại ngay thì hai bên sẽ ăn qua ăn lại mãi mãi đó.'},
+    {type:'talk', text:'Vậy là Thầy Rùa phải đi một nước ở chỗ khác. Trong lúc đó bé có thể nối quân để kết thúc Ko. Ai nhanh trí hơn sẽ thắng!',
+      b:[[1,1],[0,2],[1,3],[2,2]], w:[[2,1],[3,2],[2,3]], hints:[[1,2]]},
+  ]},
+  { title:'Trận đấu lớn', sub:'Ăn 3 quân trên bàn 7 × 7', steps:[
+    {type:'talk', text:'Đây là trận đấu lớn trên bàn 7 nhân 7! Ai ăn được 3 quân trước sẽ thắng. Thầy Rùa lần này chơi giỏi hơn một chút đó.',
+      size:7, b:[[2,2],[3,3]], w:[[3,2],[2,3]]},
+    {type:'talk', text:'Bé nhớ dùng các chiêu đã học: Atari đôi, đuổi quân ra mép bàn, và luôn cứu quân đen khi nó chỉ còn 1 hơi thở nhé!',
+      size:7, b:[[2,2],[3,3]], w:[[3,2],[2,3]]},
+    {type:'game', size:7, need:3, ai:{ cap:.7, esc:.55 }, b:[[2,2],[3,3]], w:[[3,2],[2,3]],
+      text:'Bắt đầu nào! Bé đi trước nhé.',
+      done:'Bé thắng trận đấu lớn rồi! Bé đã học xong tất cả các đảo. Thầy Rùa rất tự hào về bé!'},
   ]},
 ];
 
@@ -1385,7 +1449,7 @@ function renderCtrl(){
     h = `<div class="quiz">${st.options.map((o,k) => `<button class="gbtn" data-a="opt" data-k="${k}">${o.label}</button>`).join('')}</div>` + h;
   }
   if (st.type === 'game' && S.over && !S.done) h += `<button class="gbtn red pulse" data-a="retry">Chơi lại ván mới</button>`;
-  if (!S.done && !S.over && ['move','targets','game'].includes(st.type) && !(st.type === 'targets' && st.hint))
+  if (!S.done && !S.over && ['move','targets','game','chase'].includes(st.type) && !(st.type === 'targets' && st.hint))
     h += `<button class="gbtn alt" data-a="hint">${ICON_BULB}Gợi ý</button>`;
   if (st.type === 'duel'){
     if (S.done) h += `<button class="gbtn go pulse" data-a="newgame">Chơi ván mới${ICON_GO}</button>`;
@@ -1426,6 +1490,11 @@ function hintFor(){
   const st = S.step, B = S.board, n = B.n;
   if (st.type === 'targets') return S.targets.filter(t => !S.found.has(t));
   if (st.type === 'move') return solutions(st, B);
+  if (st.type === 'chase'){
+    const k = B.g.map((_,i) => B.g[i] ? '' : chaseKind(B,i));
+    const cap = k.flatMap((x,i) => x === 'cap' ? [i] : []);
+    return cap.length ? cap : k.flatMap((x,i) => x === 'ok' ? [i] : []);
+  }
   if (st.type === 'game'){
     const caps = groupsInAtari(B,2).flatMap(g => [...g.libs]).filter(l => play(B,l,1).ok);
     if (caps.length) return caps;
@@ -1507,7 +1576,7 @@ function pointFromEvent(e){
 }
 const placing = () => {
   const t = S.step && S.step.type;
-  return !S.done && !S.locked && !S.over && (t === 'free' || t === 'alternate' || t === 'move' || t === 'game' || t === 'targets' || t === 'duel');
+  return !S.done && !S.locked && !S.over && (t === 'free' || t === 'alternate' || t === 'move' || t === 'game' || t === 'targets' || t === 'duel' || t === 'chase');
 };
 $('#board').addEventListener('pointermove', e => {
   const g = $('#ghost'); if (!g) return;
@@ -1593,10 +1662,51 @@ function onTap(i){
       break;
     }
     case 'game': gameTap(i); break;
+    case 'chase': chaseTap(i); break;
     case 'duel': duelTap(i); break;
   }
 }
 
+/* 'chase' steps (double atari, ladders): every black move must capture or leave a white group with
+   one liberty. Thầy Rùa then runs with that group; if it reaches 3 liberties it has escaped. */
+function chaseReply(B){
+  const at = groupsInAtari(B,2).sort((a,b) => b.stones.length - a.stones.length);
+  for (const g of at){ const l = [...g.libs][0], r = play(B,l,2); if (r.ok) return [l, r]; }
+  return null;
+}
+function chaseKind(B, i){
+  const r = play(B,i,1); if (!r.ok) return 'illegal';
+  if (r.captured.length) return 'cap';
+  if (groupAt(r.board,i).libs.size < 2 || !nbrs(B.n,i).some(k => r.board.g[k] === 2 && groupAt(r.board,k).libs.size === 1)) return 'bad';
+  const rep = chaseReply(r.board); if (!rep) return 'ok';
+  return groupAt(rep[1].board, rep[0]).libs.size >= 3 && !groupsInAtari(rep[1].board, 2).length ? 'escape' : 'ok';
+}
+function chaseTap(i){
+  const st = S.step, before = S.board, r = play(before, i, 1);
+  if (!r.ok){ fail(illegalMsg(r.reason), false); return; }
+  const kind = chaseKind(before, i);
+  S.hints = []; applyMove(r, i, 1); renderBoard();
+  if (kind === 'cap'){ success(st.done); return; }
+  S.locked = true;
+  if (kind === 'bad'){
+    fail(st.fail);
+    setTimeout(() => { S.board = before; S.last = -1; S.locked = false; renderBoard(); }, 1300);
+    return;
+  }
+  setTimeout(() => {
+    const rep = chaseReply(S.board);
+    if (rep){ applyMove(rep[1], rep[0], 2); renderBoard(); }
+    if (kind === 'escape'){
+      fail(st.escaped || 'Ôi, quân trắng chạy thoát mất rồi! Mình thử lại từ đầu nhé.');
+      setTimeout(() => { S.board = cloneB(S.base); S.last = -1; S.locked = false; renderBoard(); }, 1800);
+      return;
+    }
+    S.locked = false; S.rounds++;
+    if (!rep) say('Quân trắng hết đường chạy rồi. Bé ăn nó đi!');
+    else if (S.rounds === 1) say('Thầy Rùa chạy rồi! Bé đuổi tiếp, làm cho quân trắng lại chỉ còn 1 hơi thở nhé.');
+    else { $('#say').className = 'say'; $('#sayText').textContent = 'Đuổi tiếp nào! Quân trắng nào chỉ còn 1 hơi thở thì bé ăn luôn.'; }
+  }, 700);
+}
 /* ================= Capture game ================= */
 /* Score cards under the board in match mode: stones captured so far and, in a capture race,
    how many are still needed. The side to move is highlighted; a fresh capture makes the number pop. */
