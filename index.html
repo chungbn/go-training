@@ -1236,7 +1236,7 @@ $('#worlds').addEventListener('click', e => {
 function setMode(m){
   MODE = m;
   try { localStorage.setItem(KEY + '-mode', m); } catch(e){}
-  renderMap();
+  renderMap();  scrollToNext();
 }
 $('#tabLearn').onclick = () => setMode('learn');
 $('#tabPlay').onclick = () => setMode('play');
@@ -1398,7 +1398,18 @@ function show(screen){
   $('#mapScreen').hidden = screen !== 'map';
   $('#lessonScreen').hidden = screen !== 'lesson';
   window.scrollTo(0,0);
-  if (screen === 'map'){ renderMap(); if (V.ok) speechSynthesis.cancel(); setTalking(false); }
+  if (screen === 'map'){ renderMap(); if (V.ok) speechSynthesis.cancel(); setTalking(false); scrollToNext(); }
+}
+/* Bring the next unfinished island (or level) into view so the child can tap it right away.
+   The very first one sits right under the hero, so the page stays at the top for a new player. */
+function scrollToNext(){
+  setTimeout(() => {
+    const el = MODE === 'learn' ? [...document.querySelectorAll('.isle-btn')].find(b => !b.disabled && !b.classList.contains('done'))
+      : MODE === 'play' ? $('.lv.next') : null;
+    if (!el || el.dataset.i === '0') return;
+    const smooth = !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.scrollIntoView({ block:'center', behavior: smooth ? 'smooth' : 'auto' });
+  }, 350);
 }
 function openRun(run){
   ac();
